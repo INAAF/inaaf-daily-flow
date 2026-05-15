@@ -1,0 +1,1866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>INAAF · Daily Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --s1: #141418;
+  --s2: #1c1c22;
+  --s3: #242430;
+  --border: #2a2a38;
+  --text: #eeeef5;
+  --muted: #6b6b85;
+  --amber: #f59e0b;
+  --blue: #3b82f6;
+  --green: #22c55e;
+  --red: #ef4444;
+  --pink: #ec4899;
+  --purple: #a855f7;
+  --cyan: #06b6d4;
+  --orange: #f97316;
+  --r: 16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);max-width:480px;margin:0 auto;display:flex;flex-direction:column}
+
+/* ── BOTTOM NAV ── */
+.bnav{display:flex;background:rgba(10,10,12,0.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:200}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px 8px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:8.5px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:.2s;position:relative}
+.bnav-btn .ico{font-size:18px;transition:.25s}
+.bnav-btn.active{color:#fff}
+.bnav-btn.active .ico{transform:translateY(-2px) scale(1.1)}
+.bnav-btn.active::after{content:'';position:absolute;top:0;left:15%;right:15%;height:2px;border-radius:0 0 3px 3px}
+#bn-home.active::after{background:var(--amber)}
+#bn-routine.active::after{background:var(--blue)}
+#bn-photos.active::after{background:var(--pink)}
+#bn-notes.active::after{background:var(--green)}
+#bn-money.active::after{background:var(--cyan)}
+#bn-health.active::after{background:var(--purple)}
+#bn-worship.active::after{background:var(--orange)}
+#bn-progress.active::after{background:var(--red)}
+
+/* ── PAGES ── */
+.pages{flex:1;overflow:hidden;position:relative;margin-bottom:60px}
+.page{position:absolute;inset:0;overflow-y:auto;padding:20px 16px 24px;display:none;-webkit-overflow-scrolling:touch}
+.page.active{display:block}
+
+/* ── HEADER ── */
+.ph{margin-bottom:20px}
+.ph-top{display:flex;justify-content:space-between;align-items:flex-start}
+.ph-title{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1.1}
+.ph-sub{color:var(--muted);font-size:12px;margin-top:3px}
+.ph-date{font-size:11px;color:var(--muted);font-weight:600;text-align:right;line-height:1.5}
+
+/* ── CARD ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-bottom:12px}
+
+/* ── PROGRESS BAR ── */
+.prog-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:18px}
+.prog-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prog-label{font-weight:700;font-size:14px}
+.prog-num{font-weight:800;font-size:15px;color:var(--amber)}
+.prog-track{background:var(--border);border-radius:99px;height:7px;overflow:hidden;margin-bottom:8px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--amber),var(--orange));border-radius:99px;transition:width .5s ease;width:0%}
+.prog-msg{font-size:11px;color:var(--muted)}
+
+/* ── SECTION ── */
+.sec{margin-bottom:20px}
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sec-title{font-size:14px;font-weight:700;color:var(--amber);display:flex;align-items:center;gap:5px}
+.sec-actions{display:flex;gap:6px;align-items:center}
+.btn-add{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.4);color:var(--blue);border-radius:8px;padding:4px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.2s}
+.btn-add:active{opacity:.7}
+.btn-icon{background:none;border:none;cursor:pointer;font-size:15px;opacity:.4;padding:2px;transition:opacity .2s}
+.btn-icon:active{opacity:1}
+
+/* ── TASK ── */
+.task-list{display:flex;flex-direction:column;gap:2px}
+.task{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px;display:flex;align-items:center;gap:10px;transition:.2s}
+.task.done{opacity:.45}
+.task.done .t-name{text-decoration:line-through}
+.t-chk{width:20px;height:20px;border:2px solid var(--border);border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;background:none}
+.t-chk.on{background:var(--green);border-color:var(--green)}
+.t-chk.on::after{content:'✓';color:#fff;font-size:11px;font-weight:700}
+.t-info{flex:1;min-width:0}
+.t-name{font-size:13px;font-weight:600}
+.t-time{font-size:10px;color:var(--muted);margin-top:1px}
+.t-acts{display:flex;gap:4px}
+
+/* ── STAT GRID ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat-box{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center}
+.stat-ico{font-size:12px;color:var(--muted);margin-bottom:4px}
+.stat-val{font-size:20px;font-weight:800}
+.stat-lab{font-size:9px;font-weight:700;letter-spacing:.06em;color:var(--muted);margin-top:2px}
+
+/* ── COUNTER ── */
+.counter-row{display:flex;align-items:center;gap:12px}
+.cnt-btn{width:32px;height:32px;border-radius:50%;border:none;cursor:pointer;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.cnt-btn:active{transform:scale(.9)}
+.cnt-minus{background:var(--s3);color:var(--text)}
+.cnt-plus{background:var(--blue);color:#fff}
+.cnt-val{font-size:28px;font-weight:800;min-width:40px;text-align:center}
+
+/* ── WATER BOXES ── */
+.water-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:12px}
+.water-box{aspect-ratio:1;background:var(--s3);border-radius:6px;transition:.2s;cursor:pointer}
+.water-box.filled{background:var(--cyan)}
+
+/* ── SLEEP BAR ── */
+.sleep-bar-track{background:var(--border);border-radius:99px;height:8px;overflow:hidden;margin-top:10px}
+.sleep-bar-fill{height:100%;border-radius:99px;transition:width .4s}
+
+/* ── PRAYERS ── */
+.prayer-item{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:6px;cursor:pointer;transition:.2s}
+.prayer-item.prayed{border-color:var(--green);background:rgba(34,197,94,.06)}
+.prayer-ico{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.prayer-info{flex:1}
+.prayer-name{font-weight:700;font-size:14px}
+.prayer-sub{font-size:11px;color:var(--muted)}
+.prayer-tap{font-size:10px;color:var(--muted);font-weight:600}
+.prayer-item.prayed .prayer-tap{color:var(--green)}
+
+/* ── WEEK GRID ── */
+.week-grid{overflow-x:auto;margin-top:8px}
+.week-table{border-collapse:collapse;width:100%;min-width:340px}
+.week-table th{font-size:9px;font-weight:700;letter-spacing:.06em;padding:6px 4px;text-align:center}
+.week-table td{padding:5px 4px;text-align:center}
+.week-day{font-size:10px;font-weight:700;color:var(--muted);text-align:left;padding:5px 6px 5px 0}
+.week-day.today{color:var(--amber)}
+.p-dot{width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;background:var(--s3);transition:.2s}
+.p-dot.done{color:#fff}
+
+/* ── NOTES ── */
+.feel-row{display:flex;justify-content:space-around;margin:12px 0}
+.feel-btn{display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:6px 8px;border-radius:10px;transition:.2s;border:2px solid transparent}
+.feel-btn.sel{border-color:var(--amber);background:rgba(245,158,11,.1)}
+.feel-btn span{font-size:24px}
+.feel-btn p{font-size:10px;font-weight:600;color:var(--muted)}
+.note-label{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.note-ta{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:13px;outline:none;resize:none;min-height:72px;margin-bottom:14px;transition:border-color .2s}
+.note-ta:focus{border-color:var(--amber)}
+
+/* ── MONEY ── */
+.tab-row{display:flex;background:var(--s3);border-radius:10px;padding:3px;gap:3px;margin-bottom:14px}
+.tab{flex:1;padding:9px;border-radius:8px;border:none;background:none;color:var(--muted);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+.tab.active{background:var(--s1);color:var(--text)}
+.tab.inc.active{color:var(--green)}
+.tab.exp.active{color:var(--red)}
+.fin-input{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:14px;outline:none;margin-bottom:10px;transition:border-color .2s}
+.fin-input:focus{border-color:var(--amber)}
+.fin-select{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:inherit;font-size:13px;outline:none;margin-bottom:12px}
+.txn-item{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.txn-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.txn-info{flex:1}
+.txn-desc{font-size:13px;font-weight:600}
+.txn-cat{font-size:10px;color:var(--muted)}
+.txn-amt{font-size:14px;font-weight:800}
+
+/* ── PHOTO ── */
+.mood-row{display:flex;gap:6px;margin-bottom:12px}
+.mood-btn{flex:1;background:var(--s3);border:2px solid transparent;border-radius:10px;padding:10px 2px;font-size:20px;cursor:pointer;text-align:center;transition:.2s}
+.mood-btn.sel{border-color:var(--amber);background:rgba(245,158,11,.1)}
+.photo-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.photo-img{width:100%;max-height:260px;object-fit:cover;display:block}
+.photo-meta{padding:11px 13px;display:flex;align-items:center;gap:10px}
+.photo-mood-big{font-size:20px}
+.photo-info{flex:1}
+.photo-cap{font-size:13px;font-weight:600}
+.photo-dt{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ── PROGRESS PAGE ── */
+.hist-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.hist-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hist-date{font-weight:700;font-size:13px}
+.hist-badge{background:rgba(245,158,11,.15);color:var(--amber);border-radius:99px;padding:3px 10px;font-size:11px;font-weight:700}
+.hist-chips{margin-top:8px;display:flex;flex-wrap:wrap;gap:4px}
+.chip{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:600}
+.chip.ok{background:rgba(34,197,94,.12);color:var(--green)}
+.chip.miss{background:rgba(239,68,68,.12);color:var(--red)}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:var(--s2);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:22px 18px 36px;width:100%;max-width:480px}
+.modal-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--amber);margin-bottom:16px}
+.f-group{margin-bottom:12px}
+.f-label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.05em;margin-bottom:5px;display:block}
+.f-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:13px;outline:none;transition:border-color .2s}
+.f-input:focus{border-color:var(--amber)}
+.f-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:inherit;font-size:13px;outline:none}
+.f-row{display:flex;gap:8px}
+.f-row .f-group{flex:1}
+.m-btns{display:flex;gap:8px;margin-top:16px}
+.btn-pri{flex:1;background:var(--amber);color:#000;border:none;border-radius:10px;padding:13px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+.btn-pri:active{opacity:.8}
+.btn-sec{flex:1;background:var(--s3);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:13px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+
+/* ── BUTTONS ── */
+.big-btn{width:100%;background:linear-gradient(135deg,var(--blue),var(--cyan));border:none;border-radius:12px;padding:14px;color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;transition:opacity .2s;margin-top:4px}
+.big-btn:active{opacity:.85}
+.save-btn{width:100%;background:linear-gradient(135deg,var(--amber),var(--orange));border:none;border-radius:12px;padding:14px;color:#000;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer;transition:opacity .2s;margin-top:8px}
+.save-btn:active{opacity:.85}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-ico{font-size:36px;margin-bottom:10px}
+.empty-txt{font-size:13px}
+
+/* ── LOCK SCREEN ── */
+#lock-screen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
+#lock-screen.hidden{display:none}
+.lock-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--amber) 60%,var(--orange) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.lock-sub{font-size:12px;color:var(--muted);margin-bottom:40px}
+.lock-icon{font-size:48px;margin-bottom:20px}
+.lock-dots{display:flex;gap:16px;margin-bottom:32px}
+.lock-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);background:transparent;transition:.2s}
+.lock-dot.filled{background:var(--amber);border-color:var(--amber);transform:scale(1.1)}
+.lock-dot.error{background:var(--red);border-color:var(--red)}
+.lock-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:100%;max-width:280px}
+.lock-key{background:var(--s2);border:1px solid var(--border);border-radius:16px;padding:18px;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--text);cursor:pointer;text-align:center;transition:.15s;-webkit-tap-highlight-color:transparent}
+.lock-key:active{background:var(--s3);transform:scale(.94)}
+.lock-key.del{font-size:18px;color:var(--muted)}
+.lock-key.empty-key{background:transparent;border-color:transparent;cursor:default}
+.lock-error-msg{font-size:12px;color:var(--red);font-weight:700;margin-top:16px;min-height:18px;text-align:center}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--green);color:#fff;font-weight:700;font-size:12px;padding:9px 18px;border-radius:99px;opacity:0;transition:.3s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── QURAN ── */
+.quran-counter{text-align:center;padding:20px 0}
+.quran-num{font-family:'Syne',sans-serif;font-size:72px;font-weight:800;color:var(--amber);line-height:1}
+.quran-lab{font-size:13px;color:var(--muted);margin-top:4px}
+.q-row{display:flex;justify-content:center;gap:16px;margin-top:16px}
+
+/* circle progress */
+.circle-wrap{position:relative;width:60px;height:60px}
+.circle-wrap svg{position:absolute;top:0;left:0;transform:rotate(-90deg)}
+.circle-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+
+/* tabs bar */
+.tabs-bar{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab-bar-btn{flex:1;padding:10px 4px;background:none;border:none;color:var(--muted);font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.05em;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:.2s}
+.tab-bar-btn.active{color:var(--amber);border-bottom-color:var(--amber)}
+
+#camera-input{display:none}
+
+/* ═══════════════════════════════════
+   HOME PAGE STYLES
+═══════════════════════════════════ */
+.home-header{padding:6px 0 18px;display:flex;align-items:center;gap:14px;justify-content:space-between}
+.home-greeting{font-family:'Syne',sans-serif;font-size:28px;font-weight:900;line-height:1.1;background:linear-gradient(135deg,#fff 0%,var(--amber) 60%,var(--orange) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.home-subhead{font-size:13px;color:var(--muted);margin-top:4px}
+.home-date-badge{display:inline-flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--border);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--text);margin-top:10px}
+
+/* Hero progress ring */
+.hero-ring-wrap{display:flex;align-items:center;gap:18px;background:linear-gradient(135deg,var(--s1),var(--s2));border:1px solid var(--border);border-radius:20px;padding:18px;margin-bottom:16px;position:relative;overflow:hidden}
+.hero-ring-wrap::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(245,158,11,.15),transparent 70%);pointer-events:none}
+.ring-svg-wrap{position:relative;width:88px;height:88px;flex-shrink:0}
+.ring-svg-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-pct{font-family:'Syne',sans-serif;font-size:22px;font-weight:900;color:var(--amber)}
+.ring-done{font-size:10px;color:var(--muted);font-weight:600}
+.hero-info{flex:1}
+.hero-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;margin-bottom:4px}
+.hero-msg{font-size:12px;color:var(--muted);margin-bottom:10px}
+.hero-next{background:var(--s3);border-radius:8px;padding:8px 10px}
+.hero-next-label{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.07em}
+.hero-next-task{font-size:12px;font-weight:600;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Module cards grid */
+.modules-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.mod-card{border-radius:16px;padding:16px;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s,opacity .15s;border:1px solid rgba(255,255,255,.07)}
+.mod-card:active{transform:scale(.97);opacity:.9}
+.mod-card .mod-ico{font-size:26px;margin-bottom:8px;display:block}
+.mod-card .mod-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;margin-bottom:2px}
+.mod-card .mod-val{font-size:11px;font-weight:600;opacity:.8}
+.mod-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:70px;height:70px;border-radius:50%;opacity:.2}
+
+/* individual card colours */
+.mod-routine{background:linear-gradient(135deg,#1e3a5f,#1a2f4e);border-color:rgba(59,130,246,.25)}
+.mod-routine .mod-name,.mod-routine .mod-val{color:#93c5fd}
+.mod-routine::after{background:var(--blue)}
+
+.mod-photos{background:linear-gradient(135deg,#4a1942,#3d1535);border-color:rgba(236,72,153,.25)}
+.mod-photos .mod-name,.mod-photos .mod-val{color:#f9a8d4}
+.mod-photos::after{background:var(--pink)}
+
+.mod-notes{background:linear-gradient(135deg,#14532d,#0f4024);border-color:rgba(34,197,94,.25)}
+.mod-notes .mod-name,.mod-notes .mod-val{color:#86efac}
+.mod-notes::after{background:var(--green)}
+
+.mod-money{background:linear-gradient(135deg,#083344,#072335);border-color:rgba(6,182,212,.25)}
+.mod-money .mod-name,.mod-money .mod-val{color:#67e8f9}
+.mod-money::after{background:var(--cyan)}
+
+.mod-health{background:linear-gradient(135deg,#3b0764,#2e054e);border-color:rgba(168,85,247,.25)}
+.mod-health .mod-name,.mod-health .mod-val{color:#d8b4fe}
+.mod-health::after{background:var(--purple)}
+
+.mod-worship{background:linear-gradient(135deg,#431407,#361005);border-color:rgba(249,115,22,.25)}
+.mod-worship .mod-name,.mod-worship .mod-val{color:#fdba74}
+.mod-worship::after{background:var(--orange)}
+
+/* Today's stats strip */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.strip-item{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center}
+.strip-ico{font-size:16px;margin-bottom:4px}
+.strip-val{font-size:16px;font-weight:800;line-height:1}
+.strip-lab{font-size:8.5px;color:var(--muted);font-weight:700;letter-spacing:.05em;margin-top:3px}
+
+/* Quick action row */
+.quick-row{display:flex;gap:8px;margin-bottom:16px}
+.quick-btn{flex:1;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 6px;text-align:center;cursor:pointer;transition:.15s;font-family:inherit}
+.quick-btn:active{opacity:.75;transform:scale(.96)}
+.quick-btn .q-ico{font-size:20px;display:block;margin-bottom:4px}
+.quick-btn .q-label{font-size:10px;font-weight:700;color:var(--muted)}
+
+/* Motivation banner */
+.mot-banner{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(249,115,22,.08));border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:16px;margin-bottom:16px;display:flex;gap:12px;align-items:center}
+.mot-ico{font-size:28px;flex-shrink:0}
+.mot-text{font-size:12px;color:var(--muted);font-style:italic;line-height:1.5}
+.mot-author{font-size:10px;font-weight:700;color:var(--amber);margin-top:4px}
+
+/* streak banner */
+.streak-banner{background:linear-gradient(135deg,rgba(168,85,247,.15),rgba(59,130,246,.1));border:1px solid rgba(168,85,247,.3);border-radius:14px;padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.streak-fire{font-size:30px}
+.streak-info{flex:1}
+.streak-num{font-family:'Syne',sans-serif;font-size:26px;font-weight:900;color:var(--purple);line-height:1}
+.streak-label{font-size:11px;color:var(--muted)}
+.streak-badge{background:rgba(168,85,247,.2);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--purple)}
+</style>
+</head>
+<body>
+
+<div class="pages">
+
+<!-- ══════════ HOME ══════════ -->
+<div class="page active" id="pg-home">
+  <div class="home-header">
+    <div style="flex:1">
+      <div id="home-day-time" style="font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);margin-bottom:5px">SATURDAY · 00:00</div>
+      <div id="home-greeting" style="font-family:'Syne',sans-serif;font-size:26px;font-weight:900;color:#fff;line-height:1.1">Good Morning ☀️</div>
+      <div id="home-subhead" style="font-size:12px;color:var(--muted);margin-top:4px">Make today count bismillah</div>
+    </div>
+    <div id="home-date-box" style="background:linear-gradient(135deg,#f59e0b,#f97316);border-radius:14px;padding:10px 14px;text-align:center;min-width:58px;flex-shrink:0">
+      <div id="hd-month" style="font-size:10px;font-weight:800;letter-spacing:.1em;color:#000">MAY</div>
+      <div id="hd-day" style="font-size:32px;font-weight:900;color:#000;line-height:1.1">1</div>
+      <div id="hd-weekday" style="font-size:10px;font-weight:800;letter-spacing:.08em;color:#000">SAT</div>
+    </div>
+  </div>
+
+  <!-- Hero Ring -->
+  <div class="hero-ring-wrap">
+    <div class="ring-svg-wrap">
+      <svg width="88" height="88" viewBox="0 0 88 88">
+        <circle cx="44" cy="44" r="36" fill="none" stroke="var(--border)" stroke-width="8"/>
+        <circle cx="44" cy="44" r="36" fill="none" stroke="url(#ringGrad)" stroke-width="8"
+          stroke-dasharray="226.2" id="home-ring-circle" stroke-dashoffset="226.2" stroke-linecap="round"/>
+        <defs>
+          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#f59e0b"/>
+            <stop offset="100%" stop-color="#f97316"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-pct" id="home-ring-pct">0%</div>
+        <div class="ring-done" id="home-ring-done">0/0</div>
+      </div>
+    </div>
+    <div class="hero-info">
+      <div class="hero-title">Today's Progress</div>
+      <div class="hero-msg" id="home-prog-msg">Start checking off tasks!</div>
+      <div class="hero-next">
+        <div class="hero-next-label">NEXT TASK</div>
+        <div class="hero-next-task" id="home-next-task">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streak -->
+  <div class="streak-banner">
+    <div class="streak-fire">🔥</div>
+    <div class="streak-info">
+      <div class="streak-num" id="home-streak">0</div>
+      <div class="streak-label">Day streak — keep it up!</div>
+    </div>
+    <div class="streak-badge" id="home-streak-badge">Just started</div>
+  </div>
+
+  <!-- Stats Strip -->
+  <div class="stats-strip">
+    <div class="strip-item">
+      <div class="strip-ico">🙏</div>
+      <div class="strip-val" id="hs-prayers" style="color:var(--orange)">0/5</div>
+      <div class="strip-lab">PRAYERS</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-ico">💧</div>
+      <div class="strip-val" id="hs-water" style="color:var(--cyan)">0/8</div>
+      <div class="strip-lab">WATER</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-ico">💪</div>
+      <div class="strip-val" id="hs-push" style="color:var(--pink)">0</div>
+      <div class="strip-lab">PUSHUPS</div>
+    </div>
+    <div class="strip-item">
+      <div class="strip-ico">📖</div>
+      <div class="strip-val" id="hs-quran" style="color:var(--amber)">0p</div>
+      <div class="strip-lab">QURAN</div>
+    </div>
+  </div>
+
+  <!-- Module Cards -->
+  <div class="modules-grid">
+    <div class="mod-card mod-routine" onclick="goPage('routine')">
+      <span class="mod-ico">📋</span>
+      <div class="mod-name">Routine</div>
+      <div class="mod-val" id="hm-routine">0 tasks today</div>
+    </div>
+    <div class="mod-card mod-photos" onclick="goPage('photos')">
+      <span class="mod-ico">📸</span>
+      <div class="mod-name">Photos</div>
+      <div class="mod-val" id="hm-photos">0 photos</div>
+    </div>
+    <div class="mod-card mod-notes" onclick="goPage('notes')">
+      <span class="mod-ico">📝</span>
+      <div class="mod-name">Notes</div>
+      <div class="mod-val" id="hm-notes">Tap to reflect</div>
+    </div>
+    <div class="mod-card mod-money" onclick="goPage('money')">
+      <span class="mod-ico">💰</span>
+      <div class="mod-name">Money</div>
+      <div class="mod-val" id="hm-money">Balance: 0</div>
+    </div>
+    <div class="mod-card mod-health" onclick="goPage('health')">
+      <span class="mod-ico">💪</span>
+      <div class="mod-name">Health</div>
+      <div class="mod-val" id="hm-health">0% score</div>
+    </div>
+    <div class="mod-card mod-worship" onclick="goPage('worship')">
+      <span class="mod-ico">🕌</span>
+      <div class="mod-name">Worship</div>
+      <div class="mod-val" id="hm-worship">0/5 prayers</div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-row">
+    <button class="quick-btn" onclick="goPage('routine')">
+      <span class="q-ico">✅</span>
+      <span class="q-label">Tasks</span>
+    </button>
+    <button class="quick-btn" onclick="goPage('worship')">
+      <span class="q-ico">🤲</span>
+      <span class="q-label">Prayer</span>
+    </button>
+    <button class="quick-btn" onclick="goPage('notes')">
+      <span class="q-ico">✍️</span>
+      <span class="q-label">Reflect</span>
+    </button>
+    <button class="quick-btn" onclick="goPage('money')">
+      <span class="q-ico">💸</span>
+      <span class="q-label">Money</span>
+    </button>
+  </div>
+
+  <!-- Motivation Banner -->
+  <div class="mot-banner">
+    <div class="mot-ico">💡</div>
+    <div>
+      <div class="mot-text" id="mot-quote">"Discipline is choosing between what you want now and what you want most."</div>
+      <div class="mot-author" id="mot-author">— Abraham Lincoln</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ROUTINE ══════════ -->
+<div class="page" id="pg-routine">
+  <div class="ph">
+    <div class="ph-top">
+      <div>
+        <div class="ph-title">⏱️ My Daily Routine</div>
+        <div class="ph-sub">Check off tasks as you go</div>
+      </div>
+      <div class="ph-date" id="routine-date"></div>
+    </div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-row"><span class="prog-label">Today's Progress</span><span class="prog-num" id="prog-count">0/0</span></div>
+    <div class="prog-track"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-msg" id="prog-msg">0% done — keep going!</div>
+  </div>
+  <div id="sections-wrap"></div>
+  <button class="btn-add" style="width:100%;padding:13px;border-radius:12px;font-size:13px;margin-bottom:16px" onclick="openAddSec()">＋ Add New Section</button>
+</div>
+
+<!-- ══════════ PHOTOS ══════════ -->
+<div class="page" id="pg-photos">
+  <div class="ph">
+    <div class="ph-top">
+      <div>
+        <div class="ph-title">📸 Daily Photos</div>
+        <div class="ph-sub">Your face timeline & daily moments</div>
+      </div>
+      <div id="photo-count-badge" style="background:var(--s2);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:11px;font-weight:700;color:var(--pink)">0 photos</div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+    <button onclick="openCamera()" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(236,72,153,.35);border-radius:14px;padding:18px 10px;cursor:pointer;font-family:inherit;text-align:center;transition:.15s" ontouchstart="">
+      <div style="font-size:32px;margin-bottom:6px">📷</div>
+      <div style="font-size:13px;font-weight:700;color:var(--pink)">Camera</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">Take a photo now</div>
+    </button>
+    <button onclick="openUpload()" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(59,130,246,.35);border-radius:14px;padding:18px 10px;cursor:pointer;font-family:inherit;text-align:center;transition:.15s" ontouchstart="">
+      <div style="font-size:32px;margin-bottom:6px">🖼️</div>
+      <div style="font-size:13px;font-weight:700;color:var(--blue)">Upload</div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">Pick from gallery</div>
+    </button>
+  </div>
+
+  <!-- Hidden file inputs -->
+  <input type="file" id="camera-input" accept="image/*" capture onchange="handlePhoto(event)" style="display:none">
+  <input type="file" id="upload-input" accept="image/*" onchange="handlePhoto(event)" style="display:none">
+
+  <!-- Timeline header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em">PHOTO TIMELINE</div>
+    <div id="photo-today-label" style="font-size:10px;color:var(--pink);font-weight:600"></div>
+  </div>
+  <div id="photo-grid"><div class="empty"><div class="empty-ico">📷</div><div class="empty-txt">No photos yet. Start your timeline!</div></div></div>
+</div>
+
+<!-- ══════════ PHOTO PREVIEW OVERLAY ══════════ -->
+<div id="photo-preview-overlay" style="display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column">
+  <!-- Top bar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:16px;background:rgba(0,0,0,.6);position:absolute;top:0;left:0;right:0;z-index:2">
+    <button onclick="cancelPhotoPreview()" style="background:rgba(255,255,255,.15);border:none;border-radius:50%;width:36px;height:36px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:#fff">New Photo</div>
+    <div style="width:36px"></div>
+  </div>
+
+  <!-- Preview image -->
+  <img id="preview-img" src="" alt="preview" style="width:100%;height:100%;object-fit:contain;display:block">
+
+  <!-- Bottom panel -->
+  <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,rgba(0,0,0,.95),rgba(0,0,0,.7));padding:20px 16px 36px">
+    <!-- Mood picker -->
+    <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.5);letter-spacing:.08em;margin-bottom:8px">HOW DO YOU FEEL?</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px" id="preview-mood-row">
+      <button class="prev-mood sel" data-m="😊" onclick="pickPreviewMood(this)" style="flex:1;background:rgba(245,158,11,.2);border:2px solid var(--amber);border-radius:10px;padding:8px 2px;font-size:22px;cursor:pointer">😊</button>
+      <button class="prev-mood" data-m="😐" onclick="pickPreviewMood(this)" style="flex:1;background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:10px;padding:8px 2px;font-size:22px;cursor:pointer">😐</button>
+      <button class="prev-mood" data-m="😴" onclick="pickPreviewMood(this)" style="flex:1;background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:10px;padding:8px 2px;font-size:22px;cursor:pointer">😴</button>
+      <button class="prev-mood" data-m="🤔" onclick="pickPreviewMood(this)" style="flex:1;background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:10px;padding:8px 2px;font-size:22px;cursor:pointer">🤔</button>
+      <button class="prev-mood" data-m="🔥" onclick="pickPreviewMood(this)" style="flex:1;background:rgba(255,255,255,.08);border:2px solid transparent;border-radius:10px;padding:8px 2px;font-size:22px;cursor:pointer">🔥</button>
+    </div>
+    <!-- Caption -->
+    <input id="preview-caption" placeholder="Add a caption..." style="width:100%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:11px 14px;color:#fff;font-family:inherit;font-size:13px;outline:none;margin-bottom:12px">
+    <!-- Save button -->
+    <button onclick="savePhotoFromPreview()" style="width:100%;background:linear-gradient(135deg,var(--pink),var(--purple));border:none;border-radius:12px;padding:14px;color:#fff;font-family:inherit;font-size:14px;font-weight:800;cursor:pointer">💾 Save Photo</button>
+  </div>
+</div>
+
+<!-- ══════════ NOTES ══════════ -->
+<div class="page" id="pg-notes">
+  <div class="ph">
+    <div class="ph-title">📝 Daily Notes</div>
+    <div class="ph-sub">Mistakes, learnings & improvements</div>
+  </div>
+  <div class="card">
+    <div class="card-title">TODAY'S REFLECTION</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px">How do you feel?</div>
+    <div class="feel-row">
+      <div class="feel-btn sel" data-feel="Great 😁" onclick="pickFeel(this)"><span>😁</span><p>Great</p></div>
+      <div class="feel-btn" data-feel="Good 😊" onclick="pickFeel(this)"><span>😊</span><p>Good</p></div>
+      <div class="feel-btn" data-feel="Okay 😐" onclick="pickFeel(this)"><span>😐</span><p>Okay</p></div>
+      <div class="feel-btn" data-feel="Tired 😴" onclick="pickFeel(this)"><span>😴</span><p>Tired</p></div>
+      <div class="feel-btn" data-feel="Bad 😢" onclick="pickFeel(this)"><span>😢</span><p>Bad</p></div>
+    </div>
+    <div class="note-label">❌ What mistake did I make today?</div>
+    <textarea class="note-ta" id="note-mistake" placeholder="e.g. Woke up late"></textarea>
+    <div class="note-label">💡 What did I learn today?</div>
+    <textarea class="note-ta" id="note-learn" placeholder="e.g. Sleep early"></textarea>
+    <div class="note-label">🔼 What will I improve tomorrow?</div>
+    <textarea class="note-ta" id="note-improve" placeholder="e.g. Wake at 4:30am"></textarea>
+    <div class="note-label">📋 Daily Summary</div>
+    <textarea class="note-ta" id="note-summary" placeholder="Brief summary of your day..."></textarea>
+    <button class="save-btn" onclick="saveNotes()">💾 Save Today's Notes</button>
+  </div>
+  <div style="font-size:14px;font-weight:700;margin-bottom:12px">Past Reflections</div>
+  <div id="notes-history"></div>
+</div>
+
+<!-- ══════════ MONEY ══════════ -->
+<div class="page" id="pg-money">
+  <div class="ph">
+    <div class="ph-title">💰 Money Tracker</div>
+    <div class="ph-sub">Track your income & expenses</div>
+  </div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-ico">📈 INCOME</div><div class="stat-val" id="m-income" style="color:var(--green)">0</div></div>
+    <div class="stat-box"><div class="stat-ico">📉 EXPENSE</div><div class="stat-val" id="m-expense" style="color:var(--red)">0</div></div>
+    <div class="stat-box"><div class="stat-ico">💳 BALANCE</div><div class="stat-val" id="m-balance" style="color:var(--blue)">0</div></div>
+  </div>
+  <div class="card">
+    <div class="tab-row">
+      <button class="tab inc active" id="tab-inc" onclick="setMoneyTab('inc')">📈 Income</button>
+      <button class="tab exp" id="tab-exp" onclick="setMoneyTab('exp')">📉 Expense</button>
+    </div>
+    <input class="fin-input" id="m-amount" type="number" placeholder="Amount">
+    <input class="fin-input" id="m-desc" placeholder="Description (optional)">
+    <select class="fin-select" id="m-cat">
+      <option>Salary</option><option>Business</option><option>Food</option><option>Transport</option>
+      <option>Education</option><option>Health</option><option>Shopping</option><option>Other</option>
+    </select>
+    <button class="save-btn" onclick="addTransaction()">＋ Add Transaction</button>
+  </div>
+  <div style="font-size:13px;font-weight:700;margin-bottom:10px">Today's Transactions</div>
+  <div id="txn-list"><div class="empty"><div class="empty-txt">No transactions today</div></div></div>
+</div>
+
+<!-- ══════════ HEALTH ══════════ -->
+<div class="page" id="pg-health">
+  <div class="ph">
+    <div class="ph-top">
+      <div>
+        <div class="ph-title">💪 Exercise & Health</div>
+        <div class="ph-sub" id="health-date"></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:9px;color:var(--muted);font-weight:700">STREAK</div>
+        <div style="font-size:22px;font-weight:800;color:var(--amber)" id="streak-val">0</div>
+        <div style="font-size:9px;color:var(--muted)">DAYS</div>
+      </div>
+    </div>
+    <div style="background:var(--border);border-radius:99px;height:6px;overflow:hidden;margin-top:10px">
+      <div id="health-prog" style="height:100%;background:linear-gradient(90deg,var(--pink),var(--purple));border-radius:99px;width:0%;transition:.5s"></div>
+    </div>
+    <div style="text-align:right;font-size:11px;color:var(--orange);margin-top:3px" id="health-pct">0%</div>
+  </div>
+  <div class="tabs-bar">
+    <button class="tab-bar-btn active" onclick="healthTab('today',this)">TODAY</button>
+    <button class="tab-bar-btn" onclick="healthTab('history',this)">HISTORY</button>
+  </div>
+  <div id="health-today">
+    <div class="card" style="border-left:3px solid var(--purple)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px">⚖️ Body Weight</div>
+        <div style="font-size:12px;color:var(--purple);font-weight:700" id="weight-disp">76 kg</div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px">LOG TODAY'S WEIGHT &nbsp;&nbsp; BMI EST. <span id="bmi-val" style="color:var(--purple);font-size:16px;font-weight:800">—</span></div>
+      <div class="counter-row">
+        <button class="cnt-btn cnt-minus" onclick="adjWeight(-0.1)">−</button>
+        <div class="cnt-val" id="weight-val">76</div>
+        <button class="cnt-btn cnt-plus" onclick="adjWeight(0.1)">+</button>
+        <span style="font-size:12px;color:var(--muted)">kg</span>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--pink)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px">💪 Push-ups</div>
+        <div style="font-size:12px;color:var(--pink);font-weight:700">Goal: <span id="push-goal-disp">50</span></div>
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-bottom:10px">TODAY'S COUNT</div>
+      <div class="counter-row">
+        <button class="cnt-btn cnt-minus" onclick="adjPush(-1)">−</button>
+        <div class="cnt-val" id="push-val" style="color:var(--pink)">0</div>
+        <button class="cnt-btn cnt-plus" onclick="adjPush(1)">+</button>
+        <div style="margin-left:auto">
+          <div class="circle-wrap">
+            <svg width="60" height="60" viewBox="0 0 60 60">
+              <circle cx="30" cy="30" r="24" fill="none" stroke="var(--border)" stroke-width="5"/>
+              <circle cx="30" cy="30" r="24" fill="none" stroke="var(--pink)" stroke-width="5" stroke-dasharray="150.8" id="push-circle" stroke-dashoffset="150.8" stroke-linecap="round"/>
+            </svg>
+            <div class="circle-val" id="push-pct" style="color:var(--pink)">0%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--cyan)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px">💧 Water Intake</div>
+        <div style="font-size:12px;color:var(--cyan);font-weight:700"><span id="water-val">0</span>/8 glasses</div>
+      </div>
+      <div class="counter-row">
+        <button class="cnt-btn cnt-minus" onclick="adjWater(-1)">−</button>
+        <div class="cnt-val" id="water-disp" style="color:var(--cyan)">0</div>
+        <button class="cnt-btn cnt-plus" onclick="adjWater(1)">+</button>
+        <span style="font-size:11px;color:var(--muted)" id="water-more">8 more</span>
+      </div>
+      <div class="water-grid" id="water-grid"></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--amber)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px">🌙 Sleep</div>
+        <div style="font-size:12px;font-weight:700" id="sleep-status">—</div>
+      </div>
+      <div class="counter-row">
+        <button class="cnt-btn cnt-minus" onclick="adjSleep(-0.5)">−</button>
+        <div class="cnt-val" id="sleep-val" style="color:var(--amber)">7</div>
+        <button class="cnt-btn cnt-plus" onclick="adjSleep(0.5)">+</button>
+        <span style="font-size:12px;color:var(--muted)">hours</span>
+      </div>
+      <div class="sleep-bar-track"><div class="sleep-bar-fill" id="sleep-bar" style="background:var(--amber)"></div></div>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-weight:700;font-size:14px">👟 Steps</div>
+        <div style="font-size:12px;color:var(--green);font-weight:700">Goal: 10,000</div>
+      </div>
+      <div class="counter-row">
+        <button class="cnt-btn cnt-minus" onclick="adjSteps(-100)">−</button>
+        <div class="cnt-val" id="steps-val" style="color:var(--green);font-size:22px">0</div>
+        <button class="cnt-btn cnt-plus" onclick="adjSteps(100)">+</button>
+      </div>
+    </div>
+    <button class="save-btn" onclick="saveHealth()">💾 Save Today's Health</button>
+  </div>
+  <div id="health-history" style="display:none">
+    <div id="health-hist-list"><div class="empty"><div class="empty-txt">No history yet</div></div></div>
+  </div>
+</div>
+
+<!-- ══════════ WORSHIP ══════════ -->
+<div class="page" id="pg-worship">
+  <div class="ph">
+    <div class="ph-top">
+      <div>
+        <div class="ph-title">🕌 Daily Worship</div>
+        <div class="ph-sub" id="worship-date"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div style="background:var(--s2);border-radius:8px;padding:6px 10px;text-align:center">
+          <div style="font-size:14px;font-weight:800;color:var(--blue)" id="w-prayers">0/5</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700">PRAYERS</div>
+        </div>
+        <div style="background:var(--s2);border-radius:8px;padding:6px 10px;text-align:center">
+          <div style="font-size:14px;font-weight:800;color:var(--green)" id="w-thikr">0</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700">THIKR</div>
+        </div>
+        <div style="background:var(--s2);border-radius:8px;padding:6px 10px;text-align:center">
+          <div style="font-size:14px;font-weight:800;color:var(--orange)" id="w-quran">0p</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700">QURAN</div>
+        </div>
+        <div style="background:var(--s2);border-radius:8px;padding:6px 10px;text-align:center">
+          <div style="font-size:14px;font-weight:800;color:var(--amber)" id="w-week">0%</div>
+          <div style="font-size:9px;color:var(--muted);font-weight:700">WEEK</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="tabs-bar">
+    <button class="tab-bar-btn active" onclick="worshipTab('prayers',this)">PRAYERS</button>
+    <button class="tab-bar-btn" onclick="worshipTab('quran',this)">QURAN</button>
+    <button class="tab-bar-btn" onclick="worshipTab('thikr',this)">THIKR</button>
+    <button class="tab-bar-btn" onclick="worshipTab('notes',this)">NOTES</button>
+  </div>
+  <div id="wt-prayers">
+    <div id="prayer-list"></div>
+    <div style="margin-top:16px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;margin-bottom:8px">THIS WEEK</div>
+      <div class="week-grid"><table class="week-table" id="prayer-week-table"></table></div>
+    </div>
+  </div>
+  <div id="wt-quran" style="display:none">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:3px;height:20px;background:var(--amber);border-radius:2px"></div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800">Quran Reading</div>
+      </div>
+      <div style="font-size:14px;color:var(--amber);font-family:serif;direction:rtl">القرآن</div>
+    </div>
+
+    <!-- Today summary -->
+    <div style="background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(249,115,22,.07));border:1px solid rgba(245,158,11,.25);border-radius:16px;padding:16px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;margin-bottom:6px">TODAY'S READING</div>
+          <div style="display:flex;align-items:baseline;gap:6px">
+            <div style="font-family:'Syne',sans-serif;font-size:48px;font-weight:900;color:var(--amber);line-height:1" id="quran-pages">0</div>
+            <div style="font-size:14px;color:var(--muted)">pages</div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px" id="quran-sessions-label">0 sessions logged</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;margin-bottom:4px">GOAL</div>
+          <div style="font-size:26px;font-weight:800;color:var(--orange)" id="quran-pct-disp">0%</div>
+          <div style="font-size:10px;color:var(--muted)">20 pages/day</div>
+        </div>
+      </div>
+      <div class="sleep-bar-track" style="margin-top:12px">
+        <div id="quran-bar" style="height:100%;background:linear-gradient(90deg,var(--orange),var(--amber));border-radius:99px;width:0%;transition:.4s"></div>
+      </div>
+    </div>
+
+    <!-- Log Session -->
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;margin-bottom:14px">LOG SESSION</div>
+
+      <!-- Surah selector -->
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:6px">SURAH</div>
+      <div style="position:relative;margin-bottom:10px">
+        <input class="fin-input" id="surah-search" placeholder="Select Surah..." oninput="filterSurahs()" style="margin-bottom:0;padding-right:36px" onfocus="showSurahList()" autocomplete="off">
+        <span style="position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px">▾</span>
+      </div>
+      <div id="surah-dropdown" style="display:none;background:var(--bg);border:1px solid var(--border);border-radius:10px;max-height:160px;overflow-y:auto;margin-bottom:10px">
+        <div style="padding:8px 14px;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--border)">
+          <input class="fin-input" id="surah-search-inner" placeholder="Search..." oninput="filterSurahsInner()" style="margin-bottom:0;font-size:12px;padding:8px 12px">
+        </div>
+        <div id="surah-list"></div>
+      </div>
+      <div id="surah-selected" style="display:none;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:10px 12px;margin-bottom:10px;justify-content:space-between;align-items:center">
+        <span style="font-size:13px;font-weight:600" id="surah-sel-name">—</span>
+        <button onclick="clearSurah()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px">✕</button>
+      </div>
+
+      <!-- Ayah range -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:5px">FROM AYAH</div>
+          <input class="fin-input" id="q-from" type="number" placeholder="e.g. 1" style="margin-bottom:0;text-align:center">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:5px">TO AYAH</div>
+          <input class="fin-input" id="q-to" type="number" placeholder="e.g. 10" style="margin-bottom:0;text-align:center">
+        </div>
+        <div>
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:5px">PAGES READ</div>
+          <input class="fin-input" id="q-pages-input" type="number" placeholder="0" style="margin-bottom:0;text-align:center">
+        </div>
+      </div>
+
+      <button class="save-btn" onclick="logQuranSession()" style="margin-top:0">＋ Log Session</button>
+    </div>
+
+    <!-- Sessions list -->
+    <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.07em;margin-bottom:8px">TODAY'S SESSIONS</div>
+    <div id="quran-sessions-list"><div class="empty" style="padding:20px"><div class="empty-txt">No sessions yet</div></div></div>
+  </div>
+  <div id="wt-thikr" style="display:none">
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:3px;height:20px;background:var(--green);border-radius:2px"></div>
+        <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800">Daily Thikr</div>
+      </div>
+      <div style="font-size:14px;color:var(--green);font-family:serif;direction:rtl">الذكر</div>
+    </div>
+
+    <!-- Total today summary -->
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(6,182,212,.06));border:1px solid rgba(34,197,94,.2);border-radius:14px;padding:16px;margin-bottom:14px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-bottom:8px">TOTAL THIKR TODAY</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div style="font-family:'Syne',sans-serif;font-size:52px;font-weight:900;color:var(--green);line-height:1" id="thikr-count">0</div>
+        <div style="font-size:12px;color:var(--muted);font-style:italic;text-align:right;padding-bottom:6px" id="thikr-status-msg">Begin your thikr</div>
+      </div>
+    </div>
+
+    <!-- Individual thikr cards -->
+    <div id="thikr-cards-wrap"></div>
+
+    <button onclick="resetAllThikr()" style="width:100%;margin-top:4px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:11px;font-family:inherit;cursor:pointer;font-size:12px;font-weight:600">🔄 Reset All Counters</button>
+  </div>
+  <div id="wt-notes" style="display:none">
+    <div class="card">
+      <div class="note-label">📖 Dua / Reflection</div>
+      <textarea class="note-ta" id="worship-note" placeholder="Write your dua or reflection..."></textarea>
+      <button class="save-btn" onclick="saveWorshipNote()">💾 Save Note</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PROGRESS ══════════ -->
+<div class="page" id="pg-progress">
+  <div class="ph">
+    <div class="ph-title">📊 Progress</div>
+    <div class="ph-sub">Your achievements & past days</div>
+  </div>
+
+  <!-- Weekly summary cards -->
+  <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">THIS WEEK AT A GLANCE</div>
+  <div id="progress-week-strip" style="display:flex;gap:7px;margin-bottom:18px;overflow-x:auto;padding-bottom:4px"></div>
+
+  <!-- All-time stats -->
+  <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">ALL-TIME STATS</div>
+  <div class="stat-grid" style="margin-bottom:18px">
+    <div class="stat-box"><div class="stat-ico">📅</div><div class="stat-val" id="pr-days" style="color:var(--amber)">0</div><div class="stat-lab">DAYS LOGGED</div></div>
+    <div class="stat-box"><div class="stat-ico">✅</div><div class="stat-val" id="pr-tasks" style="color:var(--green)">0</div><div class="stat-lab">TASKS DONE</div></div>
+    <div class="stat-box"><div class="stat-ico">🏆</div><div class="stat-val" id="pr-best" style="color:var(--purple)">0%</div><div class="stat-lab">BEST DAY</div></div>
+  </div>
+
+  <div style="font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;margin-bottom:10px">DAILY LOG</div>
+  <div id="history-list"><div class="empty"><div class="empty-ico">📊</div><div class="empty-txt">No history yet. Complete tasks today!</div></div></div>
+</div>
+
+</div><!-- /pages -->
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="bnav">
+  <button class="bnav-btn active" id="bn-home" onclick="goPage('home')"><span class="ico">🏠</span>Home</button>
+  <button class="bnav-btn" id="bn-routine" onclick="goPage('routine')"><span class="ico">📋</span>Routine</button>
+  <button class="bnav-btn" id="bn-photos" onclick="goPage('photos')"><span class="ico">📸</span>Photos</button>
+  <button class="bnav-btn" id="bn-notes" onclick="goPage('notes')"><span class="ico">📝</span>Notes</button>
+  <button class="bnav-btn" id="bn-money" onclick="goPage('money')"><span class="ico">💰</span>Money</button>
+  <button class="bnav-btn" id="bn-health" onclick="goPage('health')"><span class="ico">💪</span>Health</button>
+  <button class="bnav-btn" id="bn-worship" onclick="goPage('worship')"><span class="ico">🕌</span>Worship</button>
+  <button class="bnav-btn" id="bn-progress" onclick="goPage('progress')"><span class="ico">📊</span>Progress</button>
+</nav>
+
+<!-- ADD TASK MODAL -->
+<div class="overlay" id="mod-task">
+  <div class="modal">
+    <div class="modal-title" id="mod-task-title">Add Task</div>
+    <div class="f-group"><label class="f-label">TASK NAME</label><input class="f-input" id="t-name" placeholder="e.g. Study CIMA 📚"></div>
+    <div class="f-row">
+      <div class="f-group"><label class="f-label">START</label><input type="time" class="f-input" id="t-start"></div>
+      <div class="f-group"><label class="f-label">END</label><input type="time" class="f-input" id="t-end"></div>
+    </div>
+    <div class="f-group"><label class="f-label">SECTION</label><select class="f-select" id="t-sec"></select></div>
+    <div class="m-btns">
+      <button class="btn-sec" onclick="closeModal('mod-task')">Cancel</button>
+      <button class="btn-pri" onclick="saveTask()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SECTION MODAL -->
+<div class="overlay" id="mod-sec">
+  <div class="modal">
+    <div class="modal-title">Add Section</div>
+    <div class="f-group"><label class="f-label">NAME</label><input class="f-input" id="sec-name" placeholder="e.g. Evening Plan"></div>
+    <div class="f-group"><label class="f-label">ICON</label><input class="f-input" id="sec-icon" placeholder="e.g. 🌙" maxlength="4"></div>
+    <div class="m-btns">
+      <button class="btn-sec" onclick="closeModal('mod-sec')">Cancel</button>
+      <button class="btn-pri" onclick="saveSec()">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TODAY = new Date().toISOString().split('T')[0];
+const PRAYERS_LIST = [
+  {id:'fajr',name:'Fajr',ar:'الفجر',sub:'Pre-dawn',ico:'🌙',col:'#818cf8'},
+  {id:'dhuhr',name:'Dhuhr',ar:'الظهر',sub:'Midday',ico:'☀️',col:'#fbbf24'},
+  {id:'asr',name:'Asr',ar:'العصر',sub:'Afternoon',ico:'🌤️',col:'#f97316'},
+  {id:'maghrib',name:'Maghrib',ar:'المغرب',sub:'Sunset',ico:'🌇',col:'#ec4899'},
+  {id:'isha',name:'Isha',ar:'العشاء',sub:'Night',ico:'🌌',col:'#06b6d4'},
+];
+
+const QUOTES = [
+  {q:'Discipline is choosing between what you want now and what you want most.',a:'Abraham Lincoln'},
+  {q:'The secret of getting ahead is getting started.',a:'Mark Twain'},
+  {q:'Success is the sum of small efforts repeated day in and day out.',a:'Robert Collier'},
+  {q:'Do not wait; the time will never be just right.',a:'Napoleon Hill'},
+  {q:'Verily with every difficulty comes ease.',a:'Quran 94:5'},
+  {q:'Take care of your body. It\'s the only place you have to live.',a:'Jim Rohn'},
+  {q:'An investment in knowledge pays the best interest.',a:'Benjamin Franklin'},
+];
+
+let s = {
+  today: TODAY, sections:[], tasks:[], photos:[], notes:[], transactions:[],
+  health:{weight:76,pushups:0,water:0,sleep:7,steps:0,height:170},
+  healthHistory:[], worship:{prayers:{},quran:0,thikr:0,notes:'',weekData:{}},
+  history:[], moneyTab:'inc'
+};
+
+let editTaskId=null, selMood='😊', selFeel='Great 😁';
+
+function save(){ 
+  localStorage.setItem('inaaf_v3',JSON.stringify(s)); 
+  if(window.cloudSave) window.cloudSave();
+}
+function load(){
+  const d=localStorage.getItem('inaaf_v3')||localStorage.getItem('inaaf_v2');
+  if(d) s=JSON.parse(d);
+  checkDay();
+}
+window.reloadFromCloud = function(){
+  const d=localStorage.getItem('inaaf_v3');
+  if(d){ s=JSON.parse(d); checkDay(); renderHome(); }
+};
+
+function checkDay(){
+  const today=new Date().toISOString().split('T')[0];
+  if(s.today!==today){
+    if(s.tasks.length){
+      s.history.unshift({date:s.today,total:s.tasks.length,done:s.tasks.filter(t=>t.done).length,tasks:s.tasks.map(t=>({name:t.name,done:t.done}))});
+    }
+    const hd=s.health;
+    if(hd.weight||hd.pushups||hd.sleep){
+      s.healthHistory.unshift({date:s.today,...hd});
+      if(s.healthHistory.length>30) s.healthHistory=s.healthHistory.slice(0,30);
+    }
+    if(!s.worship.weekData) s.worship.weekData={};
+    s.worship.weekData[s.today]={prayers:s.worship.prayers,quran:s.worship.quran,thikr:s.worship.thikr};
+    s.tasks=s.tasks.map(t=>({...t,done:false}));
+    s.health={weight:s.health.weight,pushups:0,water:0,sleep:7,steps:0,height:s.health.height};
+    s.worship.prayers={}; s.worship.quran=0; s.worship.thikr=0;
+    s.today=today;
+    if(s.history.length>30) s.history=s.history.slice(0,30);
+    save();
+  }
+}
+
+function initDefaults(){
+  if(!s.sections.length){
+    s.sections=[
+      {id:'s1',name:'Morning Plan',icon:'🌅'},{id:'s2',name:'Morning Work',icon:'💼'},
+      {id:'s3',name:'Afternoon Plan',icon:'🌞'},{id:'s4',name:'Evening Work',icon:'💼'},
+      {id:'s5',name:'Night Routine',icon:'🌙'},
+    ];
+    s.tasks=[
+      {id:'t1',sid:'s1',name:'Wake up 🌄',start:'04:30',end:'04:35',done:false},
+      {id:'t2',sid:'s1',name:'Prayer 🙏',start:'04:35',end:'04:45',done:false},
+      {id:'t3',sid:'s1',name:'Ready to study 📝',start:'04:45',end:'05:00',done:false},
+      {id:'t4',sid:'s1',name:'Study CIMA 📚',start:'05:00',end:'08:00',done:false},
+      {id:'t5',sid:'s1',name:'Exercise 💪',start:'08:00',end:'08:20',done:false},
+      {id:'t6',sid:'s1',name:'Get ready 🪒',start:'08:20',end:'09:00',done:false},
+      {id:'t7',sid:'s2',name:'Work 💻',start:'09:00',end:'13:00',done:false},
+      {id:'t8',sid:'s3',name:'Lunch 🍱',start:'13:00',end:'13:30',done:false},
+      {id:'t9',sid:'s3',name:'Study CIMA 📚',start:'13:30',end:'14:30',done:false},
+      {id:'t10',sid:'s3',name:'Phone / Business 📱',start:'14:30',end:'15:30',done:false},
+      {id:'t11',sid:'s3',name:'Prayer / Break 🙏',start:'15:30',end:'15:45',done:false},
+      {id:'t12',sid:'s3',name:'Get ready for work 💼',start:'15:45',end:'16:00',done:false},
+      {id:'t13',sid:'s4',name:'Work 💻',start:'16:00',end:'21:00',done:false},
+      {id:'t14',sid:'s5',name:'Dinner 🍽️',start:'21:00',end:'21:15',done:false},
+      {id:'t15',sid:'s5',name:'Family time ❤️',start:'21:15',end:'21:30',done:false},
+      {id:'t16',sid:'s5',name:'Relax 📱',start:'21:30',end:'21:45',done:false},
+      {id:'t17',sid:'s5',name:'Plan tomorrow 📝',start:'21:45',end:'22:00',done:false},
+      {id:'t18',sid:'s5',name:'Sleep 😴',start:'22:00',end:'22:15',done:false},
+    ];
+    save();
+  }
+}
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function fmt(t){ if(!t) return ''; const[h,m]=t.split(':'); const hr=+h; return `${hr>12?hr-12:hr||12}:${m} ${hr>=12?'PM':'AM'}`; }
+function fmtDate(d){ return new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}); }
+function toast(msg,col='var(--green)'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.style.background=col;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// ── HOME ──
+function renderHome(){
+  const now=new Date();
+  const hr=now.getHours();
+  const min=now.getMinutes();
+
+  // Greeting + subtitle based on time
+  let greet, sub;
+  if(hr>=0 && hr<4){   greet='Tahajjud Time 🌙';    sub='The best time to connect with Allah'; }
+  else if(hr<6){        greet='Fajr Mubarak 🌅';      sub='Start with Fajr prayer first'; }
+  else if(hr<12){       greet='Good Morning ☀️';      sub='Make today count bismillah'; }
+  else if(hr<15){       greet='Good Afternoon 🌤️';   sub='Stay focused and keep going'; }
+  else if(hr<17){       greet='Asr Time 🙏';           sub="Don't miss your Asr prayer"; }
+  else if(hr<19){       greet='Good Evening 🌇';       sub='Reflect on your day so far'; }
+  else if(hr<20){       greet='Maghrib Time 🌆';       sub='Time for Maghrib prayer'; }
+  else if(hr<22){       greet='Good Night 🌌';         sub='Wind down and plan tomorrow'; }
+  else{                 greet='Rest Well 😴';           sub='Sleep early rise early'; }
+
+  document.getElementById('home-greeting').textContent = greet;
+  document.getElementById('home-subhead').textContent = sub;
+
+  // Day + time line
+  const dayName = now.toLocaleDateString('en-US',{weekday:'long'}).toUpperCase();
+  const timeStr = now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false});
+  document.getElementById('home-day-time').textContent = dayName + ' · ' + timeStr;
+
+  // Date box
+  const monthName = now.toLocaleDateString('en-US',{month:'short'}).toUpperCase();
+  const dayNum = now.getDate();
+  const weekday = now.toLocaleDateString('en-US',{weekday:'short'}).toUpperCase();
+  document.getElementById('hd-month').textContent = monthName;
+  document.getElementById('hd-day').textContent = dayNum;
+  document.getElementById('hd-weekday').textContent = weekday;
+
+  // ring / progress
+  const total=s.tasks.length, done=s.tasks.filter(t=>t.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  const circ=226.2;
+  document.getElementById('home-ring-circle').style.strokeDashoffset=circ*(1-pct/100);
+  document.getElementById('home-ring-pct').textContent=pct+'%';
+  document.getElementById('home-ring-done').textContent=`${done}/${total}`;
+  const msgs=['Start checking off tasks!','Great start, keep going! 💪','Halfway there! 🔥','Almost done! ⭐','Perfect day! 🎉 Well done!'];
+  document.getElementById('home-prog-msg').textContent=msgs[pct===100?4:pct>=75?3:pct>=50?2:pct>=25?1:0];
+
+  // next task
+  const next=s.tasks.find(t=>!t.done);
+  document.getElementById('home-next-task').textContent=next?next.name:'All done for today! 🎉';
+
+  // streak
+  let streak=0;
+  const sortedDates=[...s.healthHistory.map(h=>h.date)].sort().reverse();
+  for(let i=0;i<sortedDates.length;i++){
+    const d=new Date(sortedDates[i]+'T00:00:00');
+    const diff=Math.round((now-d)/86400000);
+    if(diff===i+1) streak++;
+    else break;
+  }
+  document.getElementById('home-streak').textContent=streak;
+  document.getElementById('home-streak-badge').textContent=streak>=30?'🏆 30+ Day Champion!':streak>=14?'⚡ 2 Week Warrior!':streak>=7?'🔥 Week Warrior!':streak>=3?'💪 On a Roll!':'Just started';
+
+  // stats strip
+  const prayersDone=PRAYERS_LIST.filter(p=>s.worship.prayers&&s.worship.prayers[p.id]).length;
+  document.getElementById('hs-prayers').textContent=`${prayersDone}/5`;
+  document.getElementById('hs-water').textContent=`${s.health.water}/8`;
+  document.getElementById('hs-push').textContent=s.health.pushups;
+  document.getElementById('hs-quran').textContent=(s.worship.quran||0)+'p';
+
+  // module cards
+  document.getElementById('hm-routine').textContent=`${done}/${total} done`;
+  document.getElementById('hm-photos').textContent=s.photos.length+' photo'+(s.photos.length!==1?'s':'');
+  const todayNote=s.notes.find(n=>n.date===TODAY);
+  document.getElementById('hm-notes').textContent=todayNote?'✓ '+todayNote.feel:'Tap to reflect';
+  const todayTxns=s.transactions.filter(t=>t.date===TODAY);
+  const inc=todayTxns.filter(t=>t.type==='inc').reduce((a,t)=>a+t.amount,0);
+  const exp=todayTxns.filter(t=>t.type==='exp').reduce((a,t)=>a+t.amount,0);
+  const bal=inc-exp;
+  document.getElementById('hm-money').textContent='Balance: '+(bal>=0?'+':'')+bal.toLocaleString();
+  const hScore=Math.round(Math.min(100,(s.health.pushups/50*30)+(s.health.water/8*30)+(s.health.sleep/8*20)+(s.health.steps/10000*20)));
+  document.getElementById('hm-health').textContent=hScore+'% score';
+  document.getElementById('hm-worship').textContent=prayersDone+'/5 prayers';
+
+  // quote
+  const q=QUOTES[now.getDay()%QUOTES.length];
+  document.getElementById('mot-quote').textContent='"'+q.q+'"';
+  document.getElementById('mot-author').textContent='— '+q.a;
+}
+
+// ── NAVIGATION ──
+function goPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  document.getElementById('bn-'+name).classList.add('active');
+  if(name==='home') renderHome();
+  if(name==='routine') renderRoutine();
+  if(name==='photos') renderPhotos();
+  if(name==='notes') renderNotes();
+  if(name==='money') renderMoney();
+  if(name==='health') renderHealth();
+  if(name==='worship') renderWorship();
+  if(name==='progress') renderProgress();
+}
+
+// ── ROUTINE ──
+function renderRoutine(){
+  const total=s.tasks.length, done=s.tasks.filter(t=>t.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('prog-count').textContent=`${done}/${total}`;
+  document.getElementById('prog-fill').style.width=pct+'%';
+  const msgs=['0% done — keep going!','Getting started! 💪','Making progress! 🔥','Almost there! ⭐','All done! Amazing! 🎉'];
+  document.getElementById('prog-msg').textContent=msgs[pct===100?4:pct>=75?3:pct>=50?2:pct>=25?1:0];
+  const now=new Date();
+  document.getElementById('routine-date').innerHTML=now.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'})+'<br>'+now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  const wrap=document.getElementById('sections-wrap');
+  wrap.innerHTML='';
+  s.sections.forEach(sec=>{
+    const tasks=s.tasks.filter(t=>t.sid===sec.id);
+    const el=document.createElement('div'); el.className='sec';
+    el.innerHTML=`<div class="sec-head"><div class="sec-title">${sec.icon} ${sec.name}</div><div class="sec-actions"><button class="btn-add" onclick="openAddTask('${sec.id}')">＋ Add</button><button class="btn-icon" onclick="delSec('${sec.id}')">🗑️</button></div></div><div class="task-list" id="tl-${sec.id}"></div>`;
+    wrap.appendChild(el);
+    const tl=el.querySelector('#tl-'+sec.id);
+    if(!tasks.length){ tl.innerHTML='<div style="text-align:center;padding:14px;color:var(--muted);font-size:11px">No tasks — add one!</div>'; }
+    else {
+      tasks.forEach(task=>{
+        const ti=document.createElement('div'); ti.className='task'+(task.done?' done':'');
+        ti.innerHTML=`<div class="t-chk${task.done?' on':''}" onclick="toggleTask('${task.id}')"></div><div class="t-info"><div class="t-name">${task.name}</div><div class="t-time">${fmt(task.start)} – ${fmt(task.end)}</div></div><div class="t-acts"><button class="btn-icon" onclick="openEditTask('${task.id}')">✏️</button><button class="btn-icon" onclick="delTask('${task.id}')">🗑️</button></div>`;
+        tl.appendChild(ti);
+      });
+    }
+  });
+}
+
+function toggleTask(id){ const t=s.tasks.find(t=>t.id===id); if(t){t.done=!t.done;save();renderRoutine();} }
+function delTask(id){ if(!confirm('Delete this task?')) return; s.tasks=s.tasks.filter(t=>t.id!==id); save();renderRoutine();toast('Task deleted','var(--red)'); }
+function delSec(id){ if(!confirm('Delete section and all its tasks?')) return; s.sections=s.sections.filter(x=>x.id!==id); s.tasks=s.tasks.filter(t=>t.sid!==id); save();renderRoutine();toast('Section deleted','var(--red)'); }
+function openAddTask(sid){ editTaskId=null; document.getElementById('mod-task-title').textContent='Add Task'; document.getElementById('t-name').value=''; document.getElementById('t-start').value=''; document.getElementById('t-end').value=''; fillSecSel(sid); document.getElementById('mod-task').classList.add('open'); }
+function openEditTask(id){ const t=s.tasks.find(x=>x.id===id); if(!t) return; editTaskId=id; document.getElementById('mod-task-title').textContent='Edit Task'; document.getElementById('t-name').value=t.name; document.getElementById('t-start').value=t.start; document.getElementById('t-end').value=t.end; fillSecSel(t.sid); document.getElementById('mod-task').classList.add('open'); }
+function fillSecSel(selId){ document.getElementById('t-sec').innerHTML=s.sections.map(sec=>`<option value="${sec.id}"${sec.id===selId?' selected':''}>${sec.icon} ${sec.name}</option>`).join(''); }
+function saveTask(){ const name=document.getElementById('t-name').value.trim(); if(!name){alert('Enter task name');return;} const obj={name,start:document.getElementById('t-start').value,end:document.getElementById('t-end').value,sid:document.getElementById('t-sec').value}; if(editTaskId){Object.assign(s.tasks.find(t=>t.id===editTaskId),obj);toast('Task updated!');}else{s.tasks.push({id:uid(),done:false,...obj});toast('Task added!');} save();closeModal('mod-task');renderRoutine(); }
+function openAddSec(){ document.getElementById('sec-name').value=''; document.getElementById('sec-icon').value=''; document.getElementById('mod-sec').classList.add('open'); }
+function saveSec(){ const name=document.getElementById('sec-name').value.trim(); if(!name){alert('Enter section name');return;} s.sections.push({id:uid(),name,icon:document.getElementById('sec-icon').value.trim()||'📌'}); save();closeModal('mod-sec');renderRoutine();toast('Section added!'); }
+
+// ── PHOTOS ──
+let previewDataUrl = null;
+let previewMood = '😊';
+
+function openCamera(){
+  document.getElementById('camera-input').click();
+}
+function openUpload(){
+  document.getElementById('upload-input').click();
+}
+function pickMood(btn){ document.querySelectorAll('.mood-btn').forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); selMood=btn.dataset.m; }
+
+function pickPreviewMood(btn){
+  document.querySelectorAll('.prev-mood').forEach(b=>{
+    b.style.background='rgba(255,255,255,.08)';
+    b.style.borderColor='transparent';
+  });
+  btn.style.background='rgba(245,158,11,.2)';
+  btn.style.borderColor='var(--amber)';
+  previewMood = btn.dataset.m;
+}
+
+function handlePhoto(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    previewDataUrl = ev.target.result;
+    previewMood = '😊';
+    document.getElementById('preview-img').src = previewDataUrl;
+    document.getElementById('preview-caption').value = '';
+    // reset mood
+    document.querySelectorAll('.prev-mood').forEach((b,i)=>{
+      b.style.background = i===0 ? 'rgba(245,158,11,.2)' : 'rgba(255,255,255,.08)';
+      b.style.borderColor = i===0 ? 'var(--amber)' : 'transparent';
+    });
+    // show overlay
+    const ov = document.getElementById('photo-preview-overlay');
+    ov.style.display = 'flex';
+    ov.style.flexDirection = 'column';
+  };
+  r.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function savePhotoFromPreview(){
+  if(!previewDataUrl){ cancelPhotoPreview(); return; }
+  const now = new Date();
+  s.photos.unshift({
+    id: uid(),
+    dataUrl: previewDataUrl,
+    caption: document.getElementById('preview-caption').value.trim(),
+    mood: previewMood,
+    date: now.toISOString().split('T')[0],
+    time: now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'})
+  });
+  save();
+  cancelPhotoPreview();
+  renderPhotos();
+  toast('Photo saved! 📸','var(--pink)');
+}
+
+function renderPhotos(){
+  const g = document.getElementById('photo-grid');
+  const badge = document.getElementById('photo-count-badge');
+  const todayLabel = document.getElementById('photo-today-label');
+  const todayPhotos = s.photos.filter(p=>p.date===TODAY);
+  badge.textContent = s.photos.length + ' photo' + (s.photos.length!==1?'s':'');
+  todayLabel.textContent = todayPhotos.length ? `${todayPhotos.length} today` : '';
+
+  if(!s.photos.length){
+    g.innerHTML='<div class="empty"><div class="empty-ico">📷</div><div class="empty-txt">No photos yet. Tap Camera to start!</div></div>';
+    return;
+  }
+  g.innerHTML='';
+
+  // Group by date
+  const groups = {};
+  s.photos.forEach(p=>{ if(!groups[p.date]) groups[p.date]=[]; groups[p.date].push(p); });
+
+  Object.keys(groups).sort().reverse().forEach(date=>{
+    // Date header
+    const isToday = date===TODAY;
+    const dh = document.createElement('div');
+    dh.style.cssText = 'font-size:11px;font-weight:700;color:'+(isToday?'var(--pink)':'var(--muted)')+';letter-spacing:.06em;margin:14px 0 8px';
+    dh.textContent = isToday ? '📅 TODAY' : '📅 '+fmtDate(date);
+    g.appendChild(dh);
+
+    groups[date].forEach(p=>{
+      const c = document.createElement('div');
+      c.className = 'photo-card';
+      c.innerHTML = `
+        <img class="photo-img" src="${p.dataUrl}" alt="photo" onclick="viewPhoto('${p.id}')" style="cursor:pointer">
+        <div class="photo-meta">
+          <div class="photo-mood-big">${p.mood}</div>
+          <div class="photo-info">
+            <div class="photo-cap">${p.caption||'No caption'}</div>
+            <div class="photo-dt">${fmtDate(p.date)} · ${p.time}</div>
+          </div>
+          <button class="btn-icon" style="opacity:.5;font-size:16px" onclick="delPhoto('${p.id}')">🗑️</button>
+        </div>`;
+      g.appendChild(c);
+    });
+  });
+}
+
+function viewPhoto(id){
+  const p = s.photos.find(x=>x.id===id);
+  if(!p) return;
+  // Show in overlay as read-only view
+  previewDataUrl = null;
+  document.getElementById('preview-img').src = p.dataUrl;
+  document.getElementById('preview-caption').value = p.caption||'';
+  document.getElementById('preview-caption').disabled = true;
+  document.querySelectorAll('.prev-mood').forEach(b=>{
+    b.style.background = b.dataset.m===p.mood ? 'rgba(245,158,11,.2)' : 'rgba(255,255,255,.08)';
+    b.style.borderColor = b.dataset.m===p.mood ? 'var(--amber)' : 'transparent';
+  });
+  const saveBtn = document.querySelector('#photo-preview-overlay button:last-child');
+  saveBtn.style.display = 'none';
+  const ov = document.getElementById('photo-preview-overlay');
+  ov.style.display = 'flex';
+  ov.style.flexDirection = 'column';
+}
+
+function cancelPhotoPreview(){
+  document.getElementById('photo-preview-overlay').style.display = 'none';
+  previewDataUrl = null;
+  document.getElementById('preview-caption').disabled = false;
+  const saveBtn = document.querySelector('#photo-preview-overlay button:last-child');
+  if(saveBtn) saveBtn.style.display = '';
+}
+
+function delPhoto(id){ if(!confirm('Delete photo?')) return; s.photos=s.photos.filter(p=>p.id!==id); save();renderPhotos();toast('Photo deleted','var(--red)'); }
+
+// ── NOTES ──
+function pickFeel(el){ document.querySelectorAll('.feel-btn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); selFeel=el.dataset.feel; }
+function saveNotes(){ const note={id:uid(),date:TODAY,feel:selFeel,mistake:document.getElementById('note-mistake').value.trim(),learn:document.getElementById('note-learn').value.trim(),improve:document.getElementById('note-improve').value.trim(),summary:document.getElementById('note-summary').value.trim()}; s.notes=s.notes.filter(n=>n.date!==TODAY); s.notes.unshift(note);save();renderNotes();toast('Notes saved! 📝'); }
+function renderNotes(){
+  const tn=s.notes.find(n=>n.date===TODAY);
+  if(tn){ document.getElementById('note-mistake').value=tn.mistake||''; document.getElementById('note-learn').value=tn.learn||''; document.getElementById('note-improve').value=tn.improve||''; document.getElementById('note-summary').value=tn.summary||''; document.querySelectorAll('.feel-btn').forEach(b=>{if(b.dataset.feel===tn.feel){b.classList.add('sel');}else{b.classList.remove('sel');}}); }
+  const h=document.getElementById('notes-history');
+  const past=s.notes.filter(n=>n.date!==TODAY);
+  if(!past.length){h.innerHTML='<div class="empty"><div class="empty-txt">No past reflections</div></div>';return;}
+  h.innerHTML='';
+  past.forEach(n=>{ const c=document.createElement('div'); c.className='hist-card'; c.innerHTML=`<div class="hist-head"><div class="hist-date">${fmtDate(n.date)}</div><div style="font-size:20px">${n.feel.split(' ')[1]||''}</div></div>${n.mistake?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px">❌ ${n.mistake}</div>`:''}${n.learn?`<div style="font-size:12px;color:var(--muted);margin-bottom:4px">💡 ${n.learn}</div>`:''}${n.improve?`<div style="font-size:12px;color:var(--muted)">🔼 ${n.improve}</div>`:''}`;h.appendChild(c); });
+}
+
+// ── MONEY ──
+let moneyType='inc';
+function setMoneyTab(t){ moneyType=t; document.getElementById('tab-inc').className='tab inc'+(t==='inc'?' active':''); document.getElementById('tab-exp').className='tab exp'+(t==='exp'?' active':''); }
+function addTransaction(){ const amt=parseFloat(document.getElementById('m-amount').value); if(!amt||amt<=0){alert('Enter valid amount');return;} s.transactions.unshift({id:uid(),type:moneyType,amount:amt,desc:document.getElementById('m-desc').value.trim(),cat:document.getElementById('m-cat').value,date:TODAY}); document.getElementById('m-amount').value='';document.getElementById('m-desc').value=''; save();renderMoney();toast(moneyType==='inc'?'Income added! 📈':'Expense added! 📉'); }
+function renderMoney(){
+  const today=s.transactions.filter(t=>t.date===TODAY);
+  const inc=today.filter(t=>t.type==='inc').reduce((a,t)=>a+t.amount,0);
+  const exp=today.filter(t=>t.type==='exp').reduce((a,t)=>a+t.amount,0);
+  document.getElementById('m-income').textContent=inc.toLocaleString();
+  document.getElementById('m-expense').textContent=exp.toLocaleString();
+  const bal=inc-exp;
+  const bEl=document.getElementById('m-balance');
+  bEl.textContent=bal.toLocaleString(); bEl.style.color=bal>=0?'var(--blue)':'var(--red)';
+  const list=document.getElementById('txn-list');
+  if(!today.length){list.innerHTML='<div class="empty"><div class="empty-txt">No transactions today</div></div>';return;}
+  list.innerHTML='';
+  today.forEach(t=>{ const el=document.createElement('div'); el.className='txn-item'; el.innerHTML=`<div class="txn-dot" style="background:${t.type==='inc'?'var(--green)':'var(--red)'}"></div><div class="txn-info"><div class="txn-desc">${t.desc||t.cat}</div><div class="txn-cat">${t.cat} · ${fmtDate(t.date)}</div></div><div class="txn-amt" style="color:${t.type==='inc'?'var(--green)':'var(--red)'}">${t.type==='inc'?'+':'-'}${t.amount.toLocaleString()}</div><button class="btn-icon" onclick="delTxn('${t.id}')">🗑️</button>`; list.appendChild(el); });
+}
+function delTxn(id){ s.transactions=s.transactions.filter(t=>t.id!==id); save();renderMoney();toast('Deleted','var(--red)'); }
+
+// ── HEALTH ──
+function healthTab(name,btn){ document.querySelectorAll('#pg-health .tab-bar-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); document.getElementById('health-today').style.display=name==='today'?'':'none'; document.getElementById('health-history').style.display=name==='history'?'':'none'; if(name==='history') renderHealthHistory(); }
+function adjWeight(d){ s.health.weight=Math.max(30,Math.round((s.health.weight+d)*10)/10); renderHealthUI(); }
+function adjPush(d){ s.health.pushups=Math.max(0,s.health.pushups+d); renderHealthUI(); }
+function adjWater(d){ s.health.water=Math.min(8,Math.max(0,s.health.water+d)); renderHealthUI(); }
+function adjSleep(d){ s.health.sleep=Math.min(12,Math.max(0,Math.round((s.health.sleep+d)*2)/2)); renderHealthUI(); }
+function adjSteps(d){ s.health.steps=Math.max(0,s.health.steps+d); renderHealthUI(); }
+function renderHealthUI(){
+  const h=s.health;
+  document.getElementById('weight-val').textContent=h.weight;
+  document.getElementById('weight-disp').textContent=h.weight+' kg';
+  const bmi=h.weight/((h.height/100)**2);
+  document.getElementById('bmi-val').textContent=bmi.toFixed(1);
+  const pushPct=Math.min(100,Math.round(h.pushups/50*100));
+  document.getElementById('push-val').textContent=h.pushups;
+  document.getElementById('push-pct').textContent=pushPct+'%';
+  document.getElementById('push-circle').style.strokeDashoffset=150.8*(1-pushPct/100);
+  document.getElementById('water-val').textContent=h.water;
+  document.getElementById('water-disp').textContent=h.water;
+  document.getElementById('water-more').textContent=Math.max(0,8-h.water)+' more';
+  const wg=document.getElementById('water-grid'); wg.innerHTML='';
+  for(let i=0;i<8;i++){const b=document.createElement('div');b.className='water-box'+(i<h.water?' filled':'');b.onclick=()=>{s.health.water=i<h.water?i:i+1;renderHealthUI();};wg.appendChild(b);}
+  document.getElementById('sleep-val').textContent=h.sleep;
+  document.getElementById('sleep-bar').style.width=Math.min(100,h.sleep/9*100)+'%';
+  document.getElementById('sleep-bar').style.background=h.sleep>=7?'var(--green)':h.sleep>=5?'var(--amber)':'var(--red)';
+  document.getElementById('sleep-status').textContent=h.sleep>=8?'Excellent 🌟':h.sleep>=7?'Good 👍':h.sleep>=5?'Fair ⚠️':'Poor ❌';
+  document.getElementById('sleep-status').style.color=h.sleep>=7?'var(--green)':h.sleep>=5?'var(--amber)':'var(--red)';
+  document.getElementById('steps-val').textContent=h.steps>=1000?(h.steps/1000).toFixed(1)+'k':h.steps;
+  const score=Math.round((pushPct*0.3)+(h.water/8*30)+(h.sleep/8*20)+(h.steps/10000*20));
+  document.getElementById('health-prog').style.width=Math.min(100,score)+'%';
+  document.getElementById('health-pct').textContent=Math.min(100,score)+'%';
+  document.getElementById('health-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+}
+function saveHealth(){ save(); toast('Health data saved! 💪'); }
+function renderHealth(){
+  renderHealthUI();
+  let streak=0;
+  const dates=[...s.healthHistory.map(h=>h.date)].sort().reverse();
+  const today=new Date();
+  for(let i=0;i<dates.length;i++){ const d=new Date(dates[i]+'T00:00:00'); const diff=Math.round((today-d)/86400000); if(diff===i+1) streak++; else break; }
+  document.getElementById('streak-val').textContent=streak;
+}
+function renderHealthHistory(){
+  const list=document.getElementById('health-hist-list');
+  if(!s.healthHistory.length){list.innerHTML='<div class="empty"><div class="empty-txt">No history yet</div></div>';return;}
+  list.innerHTML='';
+  s.healthHistory.slice(0,14).forEach(h=>{ const el=document.createElement('div'); el.className='hist-card'; el.innerHTML=`<div class="hist-head"><div class="hist-date">${fmtDate(h.date)}</div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:8px"><div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--purple)">${h.weight}kg</div><div style="font-size:9px;color:var(--muted)">Weight</div></div><div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--pink)">${h.pushups}</div><div style="font-size:9px;color:var(--muted)">Pushups</div></div><div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--amber)">${h.sleep}h</div><div style="font-size:9px;color:var(--muted)">Sleep</div></div><div style="text-align:center"><div style="font-size:14px;font-weight:800;color:var(--green)">${h.steps>=1000?(h.steps/1000).toFixed(1)+'k':h.steps}</div><div style="font-size:9px;color:var(--muted)">Steps</div></div></div>`; list.appendChild(el); });
+}
+
+// ── WORSHIP ──
+const THIKR_LIST = [
+  {id:'subhanallah', name:'Subhanallah', ar:'سبحان الله', goal:33, col:'#22c55e'},
+  {id:'alhamdulillah', name:'Alhamdulillah', ar:'الحمد لله', goal:33, col:'#f59e0b'},
+  {id:'allahuakbar', name:'Allahu Akbar', ar:'الله أكبر', goal:33, col:'#ef4444'},
+  {id:'lailaha', name:'La ilaha illallah', ar:'لا إله إلا الله', goal:100, col:'#818cf8'},
+  {id:'salawat', name:'Salawat', ar:'اللهم صل على محمد', goal:100, col:'#ec4899'},
+];
+
+const SURAHS = [
+  'Al-Fatiha','Al-Baqarah','Al-Imran','An-Nisa','Al-Maidah','Al-Anam','Al-Araf','Al-Anfal','At-Tawbah','Yunus',
+  'Hud','Yusuf','Ar-Ra\'d','Ibrahim','Al-Hijr','An-Nahl','Al-Isra','Al-Kahf','Maryam','Ta-Ha',
+  'Al-Anbiya','Al-Hajj','Al-Mu\'minun','An-Nur','Al-Furqan','Ash-Shu\'ara','An-Naml','Al-Qasas','Al-Ankabut','Ar-Rum',
+  'Luqman','As-Sajdah','Al-Ahzab','Saba','Fatir','Ya-Sin','As-Saffat','Sad','Az-Zumar','Ghafir',
+  'Fussilat','Ash-Shura','Az-Zukhruf','Ad-Dukhan','Al-Jathiyah','Al-Ahqaf','Muhammad','Al-Fath','Al-Hujurat','Qaf',
+  'Adh-Dhariyat','At-Tur','An-Najm','Al-Qamar','Ar-Rahman','Al-Waqi\'ah','Al-Hadid','Al-Mujadila','Al-Hashr','Al-Mumtahanah',
+  'As-Saf','Al-Jumu\'ah','Al-Munafiqun','At-Taghabun','At-Talaq','At-Tahrim','Al-Mulk','Al-Qalam','Al-Haqqah','Al-Ma\'arij',
+  'Nuh','Al-Jinn','Al-Muzzammil','Al-Muddaththir','Al-Qiyamah','Al-Insan','Al-Mursalat','An-Naba','An-Nazi\'at','Abasa',
+  'At-Takwir','Al-Infitar','Al-Mutaffifin','Al-Inshiqaq','Al-Buruj','At-Tariq','Al-A\'la','Al-Ghashiyah','Al-Fajr','Al-Balad',
+  'Ash-Shams','Al-Layl','Ad-Duha','Ash-Sharh','At-Tin','Al-Alaq','Al-Qadr','Al-Bayyinah','Az-Zalzalah','Al-Adiyat',
+  'Al-Qari\'ah','At-Takathur','Al-Asr','Al-Humazah','Al-Fil','Quraysh','Al-Ma\'un','Al-Kawthar','Al-Kafirun','An-Nasr',
+  'Al-Masad','Al-Ikhlas','Al-Falaq','An-Nas'
+];
+
+let selectedSurahIdx = -1;
+
+function renderWorship(){
+  const wd=s.worship;
+  const done=PRAYERS_LIST.filter(p=>wd.prayers&&wd.prayers[p.id]).length;
+  document.getElementById('w-prayers').textContent=`${done}/5`;
+  const totalThikr=(wd.thikrCounts||{});
+  const thikrSum=Object.values(totalThikr).reduce((a,v)=>a+v,0);
+  document.getElementById('w-thikr').textContent=thikrSum||wd.thikr||0;
+  document.getElementById('w-quran').textContent=(wd.quran||0)+'p';
+  document.getElementById('worship-date').textContent=new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const weekDates=getLast7Days();
+  let weekTotal=0,weekDone=0;
+  weekDates.forEach(d=>{ const wdata=wd.weekData&&wd.weekData[d]; weekTotal+=5; if(wdata) weekDone+=PRAYERS_LIST.filter(p=>wdata.prayers&&wdata.prayers[p.id]).length; if(d===TODAY) weekDone+=done; });
+  document.getElementById('w-week').textContent=weekTotal?Math.round(weekDone/weekTotal*100)+'%':'0%';
+  const pl=document.getElementById('prayer-list'); pl.innerHTML='';
+  PRAYERS_LIST.forEach(p=>{ const prayed=!!(wd.prayers&&wd.prayers[p.id]); const el=document.createElement('div'); el.className='prayer-item'+(prayed?' prayed':''); el.onclick=()=>togglePrayer(p.id); el.innerHTML=`<div class="prayer-ico" style="background:${p.col}22;color:${p.col};font-size:22px">${p.ico}</div><div class="prayer-info"><div class="prayer-name">${p.name} <span style="color:var(--muted);font-size:12px">${p.ar}</span></div><div class="prayer-sub">${p.sub}</div></div><div class="prayer-tap">${prayed?'✓ Prayed':'TAP'}</div>`; pl.appendChild(el); });
+  const tbl=document.getElementById('prayer-week-table'); const days=getLast7Days();
+  tbl.innerHTML=`<tr><td></td>${PRAYERS_LIST.map(p=>`<th style="color:${p.col}">${p.name.slice(0,3).toUpperCase()}</th>`).join('')}</tr>`;
+  days.forEach(d=>{ const isToday=d===TODAY; const label=new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'}); const dateNum=new Date(d+'T00:00:00').getDate(); let prayerState={}; if(isToday) prayerState=wd.prayers||{}; else if(wd.weekData&&wd.weekData[d]) prayerState=wd.weekData[d].prayers||{}; const tr=document.createElement('tr'); tr.innerHTML=`<td class="week-day${isToday?' today':''}">${label}<br><span style="font-size:9px">${dateNum}</span></td>`+PRAYERS_LIST.map(p=>{ const pdone=!!prayerState[p.id]; return `<td><div class="p-dot${pdone?' done':''}" style="${pdone?`background:${p.col}`:''}"></div></td>`; }).join(''); tbl.appendChild(tr); });
+  renderQuranUI();
+  renderThikrUI();
+  document.getElementById('worship-note').value=wd.notes||'';
+}
+
+function togglePrayer(id){ if(!s.worship.prayers) s.worship.prayers={}; s.worship.prayers[id]=!s.worship.prayers[id]; save();renderWorship();toast(s.worship.prayers[id]?'Prayer recorded 🤲':'Unmarked','var(--blue)'); }
+
+// ── QURAN ──
+function renderQuranUI(){
+  const pages=s.worship.quran||0;
+  const sessions=s.worship.quranSessions||[];
+  const todaySessions=sessions.filter(s=>s.date===TODAY);
+  document.getElementById('quran-pages').textContent=pages;
+  document.getElementById('quran-sessions-label').textContent=todaySessions.length+' session'+(todaySessions.length!==1?'s':'')+' logged';
+  const pct=Math.min(100,Math.round(pages/20*100));
+  document.getElementById('quran-pct-disp').textContent=pct+'%';
+  document.getElementById('quran-bar').style.width=pct+'%';
+  // sessions list
+  const list=document.getElementById('quran-sessions-list');
+  if(!todaySessions.length){list.innerHTML='<div class="empty" style="padding:20px"><div class="empty-txt">No sessions yet</div></div>';return;}
+  list.innerHTML='';
+  todaySessions.slice().reverse().forEach(sess=>{
+    const el=document.createElement('div');
+    el.style.cssText='background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:6px;display:flex;align-items:center;gap:10px';
+    el.innerHTML=`<div style="width:36px;height:36px;border-radius:50%;background:rgba(245,158,11,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📖</div>
+    <div style="flex:1">
+      <div style="font-weight:700;font-size:13px">${sess.surah||'General reading'}</div>
+      <div style="font-size:10px;color:var(--muted)">${sess.from&&sess.to?`Ayah ${sess.from}–${sess.to} · `:''}<span style="color:var(--amber);font-weight:700">${sess.pages}p</span></div>
+    </div>
+    <button onclick="delQuranSession('${sess.id}')" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:.4">🗑️</button>`;
+    list.appendChild(el);
+  });
+}
+
+function buildSurahList(){
+  const wrap=document.getElementById('surah-list');
+  wrap.innerHTML='';
+  SURAHS.forEach((name,i)=>{
+    const el=document.createElement('div');
+    el.style.cssText='padding:10px 14px;font-size:13px;cursor:pointer;border-bottom:1px solid var(--border);transition:.15s';
+    el.textContent=`${i+1}. ${name}`;
+    el.onmousedown=()=>selectSurah(i);
+    wrap.appendChild(el);
+  });
+}
+
+function filterSurahsInner(){
+  const q=document.getElementById('surah-search-inner').value.toLowerCase();
+  const items=document.getElementById('surah-list').children;
+  Array.from(items).forEach(item=>{ item.style.display=item.textContent.toLowerCase().includes(q)?'':'none'; });
+}
+
+function filterSurahs(){
+  const q=document.getElementById('surah-search').value.toLowerCase();
+  document.getElementById('surah-dropdown').style.display='block';
+  const items=document.getElementById('surah-list').children;
+  Array.from(items).forEach(item=>{ item.style.display=item.textContent.toLowerCase().includes(q)?'':'none'; });
+}
+
+function showSurahList(){
+  buildSurahList();
+  document.getElementById('surah-dropdown').style.display='block';
+}
+
+function selectSurah(idx){
+  selectedSurahIdx=idx;
+  document.getElementById('surah-search').value=`${idx+1}. ${SURAHS[idx]}`;
+  document.getElementById('surah-dropdown').style.display='none';
+  document.getElementById('surah-sel-name').textContent=`${idx+1}. ${SURAHS[idx]}`;
+  document.getElementById('surah-selected').style.display='flex';
+}
+
+function clearSurah(){
+  selectedSurahIdx=-1;
+  document.getElementById('surah-search').value='';
+  document.getElementById('surah-sel-name').textContent='—';
+  document.getElementById('surah-selected').style.display='none';
+}
+
+function logQuranSession(){
+  const pages=parseInt(document.getElementById('q-pages-input').value)||0;
+  if(pages<=0){toast('Enter pages read','var(--red)');return;}
+  if(!s.worship.quranSessions) s.worship.quranSessions=[];
+  const sess={
+    id:uid(), date:TODAY,
+    surah:selectedSurahIdx>=0?`${selectedSurahIdx+1}. ${SURAHS[selectedSurahIdx]}`:'',
+    from:document.getElementById('q-from').value,
+    to:document.getElementById('q-to').value,
+    pages
+  };
+  s.worship.quranSessions.push(sess);
+  s.worship.quran=(s.worship.quran||0)+pages;
+  document.getElementById('q-pages-input').value='';
+  document.getElementById('q-from').value='';
+  document.getElementById('q-to').value='';
+  clearSurah();
+  save(); renderQuranUI();
+  document.getElementById('w-quran').textContent=s.worship.quran+'p';
+  toast('Session logged! 📖 +'+pages+' pages','var(--orange)');
+}
+
+function delQuranSession(id){
+  const sess=(s.worship.quranSessions||[]).find(x=>x.id===id);
+  if(!sess) return;
+  s.worship.quran=Math.max(0,(s.worship.quran||0)-sess.pages);
+  s.worship.quranSessions=s.worship.quranSessions.filter(x=>x.id!==id);
+  save(); renderQuranUI();
+  document.getElementById('w-quran').textContent=s.worship.quran+'p';
+  toast('Session removed','var(--red)');
+}
+
+// close surah dropdown on outside tap
+document.addEventListener('click',e=>{ const dd=document.getElementById('surah-dropdown'); const inp=document.getElementById('surah-search'); if(dd&&inp&&!dd.contains(e.target)&&e.target!==inp) dd.style.display='none'; });
+
+// ── THIKR ──
+function renderThikrUI(){
+  if(!s.worship.thikrCounts) s.worship.thikrCounts={};
+  const counts=s.worship.thikrCounts;
+  const totalSum=Object.values(counts).reduce((a,v)=>a+v,0);
+  document.getElementById('thikr-count').textContent=totalSum;
+  document.getElementById('w-thikr').textContent=totalSum;
+  const msgs=['Begin your thikr','Keep going! 🤲','MashaAllah! 🌟','SubhanAllah! ✨','Allahu Akbar! 🏆'];
+  const msgIdx=totalSum===0?0:totalSum<50?1:totalSum<100?2:totalSum<200?3:4;
+  document.getElementById('thikr-status-msg').textContent=msgs[msgIdx];
+  const wrap=document.getElementById('thikr-cards-wrap');
+  wrap.innerHTML='';
+  THIKR_LIST.forEach(t=>{
+    const cnt=counts[t.id]||0;
+    const pct=Math.min(100,Math.round(cnt/t.goal*100));
+    const done=cnt>=t.goal;
+    const el=document.createElement('div');
+    el.style.cssText=`background:var(--s1);border:1px solid ${done?t.col+'55':'var(--border)'};border-radius:14px;padding:14px 16px;margin-bottom:8px;transition:.2s;${done?`background:${t.col}0a;`:''}`;
+    el.innerHTML=`
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="flex:1;min-width:0">
+          <div style="font-weight:700;font-size:15px;margin-bottom:2px">${t.name}</div>
+          <div style="font-size:13px;color:var(--muted);font-family:serif;direction:rtl;text-align:left;margin-bottom:6px">${t.ar}</div>
+          <div style="font-size:10px;color:var(--muted);margin-bottom:6px">${cnt}/${t.goal} · ${Math.max(0,t.goal-cnt)} remaining</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <button onclick="adjThikrItem('${t.id}',-1)" style="width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--s3);color:var(--text);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-weight:300">−</button>
+          <div onclick="adjThikrItem('${t.id}',1)" style="width:52px;height:52px;border-radius:50%;background:${t.col}25;border:2.5px solid ${t.col};display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:20px;font-weight:900;color:${t.col};cursor:pointer;flex-shrink:0">${cnt}</div>
+        </div>
+      </div>`;
+    wrap.appendChild(el);
+  });
+}
+
+function adjThikrItem(id, delta){
+  if(!s.worship.thikrCounts) s.worship.thikrCounts={};
+  s.worship.thikrCounts[id]=Math.max(0,(s.worship.thikrCounts[id]||0)+delta);
+  const total=Object.values(s.worship.thikrCounts).reduce((a,v)=>a+v,0);
+  s.worship.thikr=total;
+  save(); renderThikrUI();
+  const t=THIKR_LIST.find(x=>x.id===id);
+  if(t && s.worship.thikrCounts[id]===t.goal) toast(t.name+' complete! 🌟','var(--green)');
+}
+
+function resetAllThikr(){
+  if(!confirm('Reset all thikr counts?')) return;
+  s.worship.thikrCounts={};
+  s.worship.thikr=0;
+  save(); renderThikrUI();
+  toast('Thikr reset','var(--muted)');
+}
+
+function adjThikr(d){ /* legacy compat */ }
+
+function saveWorshipNote(){ s.worship.notes=document.getElementById('worship-note').value; save(); toast('Note saved!'); }
+function worshipTab(name,btn){ document.querySelectorAll('#pg-worship .tab-bar-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); ['prayers','quran','thikr','notes'].forEach(t=>{ document.getElementById('wt-'+t).style.display=t===name?'':'none'; }); if(name==='quran') renderQuranUI(); if(name==='thikr') renderThikrUI(); }
+function getLast7Days(){ const days=[]; for(let i=6;i>=0;i--){ const d=new Date(); d.setDate(d.getDate()-i); days.push(d.toISOString().split('T')[0]); } return days; }
+
+// ── PROGRESS ──
+function renderProgress(){
+  // week strip
+  const strip=document.getElementById('progress-week-strip');
+  const days=getLast7Days();
+  const dayColors=['var(--amber)','var(--blue)','var(--pink)','var(--green)','var(--cyan)','var(--purple)','var(--orange)'];
+  strip.innerHTML='';
+  days.forEach((d,i)=>{
+    const hist=s.history.find(h=>h.date===d);
+    const pct=hist?Math.round(hist.done/hist.total*100):0;
+    const isToday=d===TODAY;
+    const label=new Date(d+'T00:00:00').toLocaleDateString('en-US',{weekday:'short'});
+    const el=document.createElement('div');
+    el.style.cssText='flex-shrink:0;width:52px;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:10px 6px;text-align:center;'+(isToday?`border-color:${dayColors[i]};background:${dayColors[i]}18;`:'');
+    el.innerHTML=`<div style="font-size:9px;font-weight:700;color:${isToday?dayColors[i]:'var(--muted)'};margin-bottom:6px">${label.toUpperCase()}</div><div style="font-size:17px;font-weight:800;color:${dayColors[i]}">${isToday?Math.round(s.tasks.filter(t=>t.done).length/Math.max(1,s.tasks.length)*100):pct}%</div><div style="font-size:9px;color:var(--muted);margin-top:3px">${isToday?'Today':hist?hist.done+'/'+hist.total:'—'}</div>`;
+    strip.appendChild(el);
+  });
+
+  // all-time stats
+  const totalDays=s.history.length;
+  const totalDone=s.history.reduce((a,h)=>a+h.done,0);
+  const bestPct=s.history.length?Math.max(...s.history.map(h=>Math.round(h.done/h.total*100))):0;
+  document.getElementById('pr-days').textContent=totalDays;
+  document.getElementById('pr-tasks').textContent=totalDone;
+  document.getElementById('pr-best').textContent=bestPct+'%';
+
+  // daily log
+  const list=document.getElementById('history-list');
+  if(!s.history.length){list.innerHTML='<div class="empty"><div class="empty-ico">📊</div><div class="empty-txt">No history yet. Complete tasks today!</div></div>';return;}
+  list.innerHTML='';
+  s.history.forEach(day=>{
+    const pct=day.total?Math.round(day.done/day.total*100):0;
+    const col=pct>=80?'var(--green)':pct>=50?'var(--amber)':'var(--red)';
+    const el=document.createElement('div'); el.className='hist-card';
+    el.innerHTML=`<div class="hist-head"><div class="hist-date">${fmtDate(day.date)}</div><div class="hist-badge" style="color:${col};background:${col}22">${day.done}/${day.total} · ${pct}%</div></div><div class="prog-track"><div class="prog-fill" style="width:${pct}%;background:linear-gradient(90deg,${col},${col})"></div></div><div class="hist-chips">${day.tasks.map(t=>`<span class="chip ${t.done?'ok':'miss'}">${t.done?'✓':'✗'} ${t.name}</span>`).join('')}</div>`;
+    list.appendChild(el);
+  });
+}
+
+// ── INIT ──
+load();
+initDefaults();
+renderHome();
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+// ── LOCK SCREEN ──
+const LOCK_CODE = '4801';
+let lockInput = '';
+let lockShaking = false;
+
+function lockKey(digit){
+  if(lockInput.length >= 4 || lockShaking) return;
+  lockInput += digit;
+  updateLockDots();
+  if(lockInput.length === 4){
+    setTimeout(()=>checkLockCode(), 100);
+  }
+}
+
+function lockDel(){
+  if(lockShaking) return;
+  lockInput = lockInput.slice(0,-1);
+  updateLockDots();
+  document.getElementById('lock-error').textContent='';
+}
+
+function updateLockDots(){
+  for(let i=0;i<4;i++){
+    const dot=document.getElementById('ld'+i);
+    dot.className='lock-dot'+(i<lockInput.length?' filled':'');
+  }
+}
+
+function checkLockCode(){
+  if(lockInput === LOCK_CODE){
+    // Correct — unlock
+    const ls=document.getElementById('lock-screen');
+    ls.style.transition='opacity .4s';
+    ls.style.opacity='0';
+    setTimeout(()=>ls.classList.add('hidden'),400);
+  } else {
+    // Wrong — shake and reset
+    lockShaking=true;
+    document.getElementById('lock-error').textContent='Incorrect PIN. Try again.';
+    for(let i=0;i<4;i++){
+      const dot=document.getElementById('ld'+i);
+      dot.className='lock-dot error';
+    }
+    // Shake animation
+    const pad=document.getElementById('lock-dots');
+    pad.style.transition='transform .08s';
+    let shakes=0;
+    const shakeInterval=setInterval(()=>{
+      pad.style.transform=shakes%2===0?'translateX(10px)':'translateX(-10px)';
+      shakes++;
+      if(shakes>5){
+        clearInterval(shakeInterval);
+        pad.style.transform='translateX(0)';
+        lockInput='';
+        lockShaking=false;
+        updateLockDots();
+        setTimeout(()=>{ document.getElementById('lock-error').textContent=''; },1200);
+      }
+    },80);
+  }
+}
+</script>
+<!-- ══════════ FIREBASE CLOUD SYNC ══════════ -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBBzd69uD-B2VItRtsmuOZ0t7pgXQVRCT0",
+  authDomain: "inaf-40d56.firebaseapp.com",
+  projectId: "inaf-40d56",
+  storageBucket: "inaf-40d56.firebasestorage.app",
+  messagingSenderId: "692608751040",
+  appId: "1:692608751040:web:91d8f246f858b401702425"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// Unique ID for this device
+let DEVICE_ID = localStorage.getItem('inaaf_device_id');
+if(!DEVICE_ID){ DEVICE_ID='inaaf_'+Math.random().toString(36).slice(2,10); localStorage.setItem('inaaf_device_id',DEVICE_ID); }
+
+// Sync indicator UI
+function showSync(msg, color){
+  let el = document.getElementById('sync-badge');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'sync-badge';
+    el.style.cssText = 'position:fixed;top:8px;right:8px;background:#141418;border:1px solid #2a2a38;border-radius:99px;padding:4px 12px;font-size:11px;font-weight:700;z-index:10000;transition:opacity .5s';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.color = color || '#f59e0b';
+  el.style.opacity = '1';
+  if(msg.includes('Saved') || msg.includes('Synced')) setTimeout(()=>{ el.style.opacity='0'; }, 3000);
+}
+
+// Save to cloud (called from main script via window)
+let saveTimer = null;
+window.cloudSave = function(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async ()=>{
+    showSync('☁️ Saving...', '#f59e0b');
+    try {
+      const data = localStorage.getItem('inaaf_v3');
+      if(!data) return;
+      await setDoc(doc(db, 'inaaf_users', DEVICE_ID), {
+        data: data,
+        savedAt: new Date().toISOString()
+      });
+      showSync('☁️ Saved!', '#22c55e');
+    } catch(e){
+      showSync('📴 Offline', '#ef4444');
+    }
+  }, 2000);
+};
+
+// Load from cloud on startup
+async function cloudLoad(){
+  showSync('☁️ Syncing...', '#f59e0b');
+  try {
+    const snap = await getDoc(doc(db, 'inaaf_users', DEVICE_ID));
+    if(snap.exists()){
+      const cloudData = snap.data().data;
+      const local = localStorage.getItem('inaaf_v3');
+      // Use whichever has more history
+      if(cloudData){
+        const cloud = JSON.parse(cloudData);
+        const loc = local ? JSON.parse(local) : null;
+        if(!loc || (cloud.history||[]).length >= (loc.history||[]).length){
+          localStorage.setItem('inaaf_v3', cloudData);
+          // Reload app state from updated localStorage
+          if(window.reloadFromCloud) window.reloadFromCloud();
+        }
+      }
+      showSync('☁️ Synced!', '#22c55e');
+    } else {
+      // First time — push local to cloud
+      const data = localStorage.getItem('inaaf_v3');
+      if(data){
+        await setDoc(doc(db, 'inaaf_users', DEVICE_ID), { data, savedAt: new Date().toISOString() });
+        showSync('☁️ Backed up!', '#22c55e');
+      } else {
+        showSync('☁️ Ready', '#22c55e');
+      }
+    }
+  } catch(e){
+    showSync('📴 Offline mode', '#ef4444');
+    setTimeout(()=>{ const el=document.getElementById('sync-badge'); if(el) el.style.opacity='0'; }, 3000);
+  }
+}
+
+cloudLoad();
+</script>
+
+<!-- ══════════ LOCK SCREEN ══════════ -->
+<div id="lock-screen">
+  <div class="lock-logo">INAAF · Daily Flow</div>
+  <div class="lock-sub">Your personal daily tracker</div>
+  <div class="lock-icon">🔐</div>
+  <div style="font-size:13px;color:var(--muted);margin-bottom:20px;font-weight:600">Enter your PIN</div>
+  <div class="lock-dots" id="lock-dots">
+    <div class="lock-dot" id="ld0"></div>
+    <div class="lock-dot" id="ld1"></div>
+    <div class="lock-dot" id="ld2"></div>
+    <div class="lock-dot" id="ld3"></div>
+  </div>
+  <div class="lock-pad">
+    <button class="lock-key" onclick="lockKey('1')">1</button>
+    <button class="lock-key" onclick="lockKey('2')">2</button>
+    <button class="lock-key" onclick="lockKey('3')">3</button>
+    <button class="lock-key" onclick="lockKey('4')">4</button>
+    <button class="lock-key" onclick="lockKey('5')">5</button>
+    <button class="lock-key" onclick="lockKey('6')">6</button>
+    <button class="lock-key" onclick="lockKey('7')">7</button>
+    <button class="lock-key" onclick="lockKey('8')">8</button>
+    <button class="lock-key" onclick="lockKey('9')">9</button>
+    <div class="lock-key empty-key"></div>
+    <button class="lock-key" onclick="lockKey('0')">0</button>
+    <button class="lock-key del" onclick="lockDel()">⌫</button>
+  </div>
+  <div class="lock-error-msg" id="lock-error"></div>
+</div>
+
+</body>
+</html>
